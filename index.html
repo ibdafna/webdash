@@ -48,6 +48,7 @@
                             const data = new Blob([Module.FS.readFile(scriptFilePath)], 
                                 { type: 'text/javascript' });
                             const url = URL.createObjectURL(data);
+                            scriptTag.async = false;
                             scriptTag.src = url;
                         })
 
@@ -62,6 +63,7 @@
                                 { type: 'text/javascript' });
                         const url = URL.createObjectURL(data);
                         scriptTag.src = url;
+                        scriptTag.async = false;
                         scriptTags.push(scriptTag);
                     }
 
@@ -72,25 +74,23 @@
                          generateScriptBlob(dccDir, fileName);
                      })
 
-                     // Dash html components
-                     const dhcDir = `${sitePackagesDir}dash_html_components/`;
+                    // Dash html components
+                    const dhcDir = `${sitePackagesDir}dash_html_components/`;
                     ["dash_html_components.min.js"].forEach(fileName => {
                         generateScriptBlob(dhcDir, fileName);
-                     })
+                    })
 
-                    
                     // Start up script
                     const rendererStartScript = pyodide.runPython("server.renderer");
                     const rendererScriptTag = document.createElement("script");
                     const scriptBlob = new Blob([rendererStartScript], { type: 'text/javascript' })
                     const rendererUrl = URL.createObjectURL(scriptBlob);
                     rendererScriptTag.id = "_dash-renderer";
+                    rendererScriptTag.async = false;
                     rendererScriptTag.src = rendererUrl;
                     scriptTags.push(rendererScriptTag);
 
-
                     scriptTags.forEach(script => footer.appendChild(script));
-                    console.log("End of chain");
                 })
             })
         });
