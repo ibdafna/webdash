@@ -10,18 +10,17 @@
     <script src="./src/index.ts"></script> 
     <script type="text/javascript"> window.languagePluginUrl = 'http://localhost:9999/'; </script>
     <script src="http://localhost:9999/pyodide.js"></script>
+    <script src="./src/app.ts"></script>
     <script type="text/javascript">
         languagePluginLoader.then(() => {
-            // pyodide is now ready to use...
+            // Pyodide ready to use. App entry entry point.
             pyodide.runPythonAsync(`
-                import dash
-                import micropip
-                server = dash.Dash()
-                server.index()
+${window.DashApp}
+app.index()
             `).then(indexContent => {
                 document.getElementsByTagName("html")[0].innerHTML = indexContent;
                 pyodide.runPythonAsync(`
-                    server._generate_scripts_html()
+                    app._generate_scripts_html()
                 `).then(scriptChunk => {
                     const sitePackagesDir = "/lib/python3.8/site-packages/";
                     const scriptTags = scriptChunk.split("\n").map(script => {
@@ -81,7 +80,7 @@
                     })
 
                     // Start up script
-                    const rendererStartScript = pyodide.runPython("server.renderer");
+                    const rendererStartScript = pyodide.runPython("app.renderer");
                     const rendererScriptTag = document.createElement("script");
                     const scriptBlob = new Blob([rendererStartScript], { type: 'text/javascript' })
                     const rendererUrl = URL.createObjectURL(scriptBlob);
