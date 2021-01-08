@@ -1,5 +1,6 @@
-export const app = 
-`import dash
+//@ts-ignore
+window.DashApp = `
+import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
@@ -27,5 +28,6 @@ def update_output_div(input_value):
     return 'Output: {}'.format(input_value)
 
 
-#if __name__ == '__main__':
-    #app.run_server(debug=True)`
+if __name__ == '__main__':
+    app.run_server(debug=True)
+`
