@@ -68,7 +68,11 @@ app.index()
 
                     // Dash core components
                     const dccDir = `${sitePackagesDir}dash_core_components/`;
-                    ["dash_core_components.min.js", 
+                    ["async-plotlyjs.js",
+                     "async-graph.js",
+                     "async-markdown.js",
+                     "async-highlight.js",
+                     "dash_core_components.min.js", 
                      "dash_core_components-shared.js"].forEach(fileName => {
                          generateScriptBlob(dccDir, fileName);
                      })
