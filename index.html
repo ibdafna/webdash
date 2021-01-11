@@ -2,15 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Crazy Attempt</title>
+    <title>Dash-WebAssembly</title>
 </head>
 <body>
     <p>Dash-WebAssembly is booting...</p>
-    <script src="./src/app.ts"></script>
+    <script src="./src/cross_filtering_app.ts"></script>
     <script src="./src/index.ts"></script> 
     <script type="text/javascript"> window.languagePluginUrl = 'http://localhost:9999/'; </script>
     <script src="http://localhost:9999/pyodide.js"></script>
-    <script src="./src/app.ts"></script>
     <script type="text/javascript">
         languagePluginLoader.then(() => {
             // Pyodide ready to use. App entry entry point.
@@ -66,12 +65,15 @@ app.index()
                         scriptTags.push(scriptTag);
                     }
 
+                    // TODO: actually load these async..
                     // Dash core components
                     const dccDir = `${sitePackagesDir}dash_core_components/`;
                     ["async-plotlyjs.js",
                      "async-graph.js",
                      "async-markdown.js",
                      "async-highlight.js",
+                     "async-dropdown.js",
+                     "async-slider.js",
                      "dash_core_components.min.js", 
                      "dash_core_components-shared.js"].forEach(fileName => {
                          generateScriptBlob(dccDir, fileName);
