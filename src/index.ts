@@ -14,7 +14,7 @@ x`,
 function postRequest(req, init) {
   console.log('[POST Request]', req, init);
   return `
-with app.server.test_request_context('${req}', json=${init.body}): 
+with app.server.test_request_context('${req}', data='''${init.body}''', content_type="application/json"): 
   x = app.dispatch()
 x`
 }
