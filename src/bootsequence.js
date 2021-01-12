@@ -1,8 +1,8 @@
 languagePluginLoader.then(() => {
     // Pyodide ready to use. App entry entry point.
     pyodide.runPythonAsync(`
-        ${window.DashApp}
-        app.index()
+${window.DashApp}
+app.index()
     `).then(indexContent => {
         document.getElementsByTagName("html")[0].innerHTML = indexContent;
         pyodide.runPythonAsync(`
