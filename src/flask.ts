@@ -1,8 +1,9 @@
+import { asyncRun } from './worker-loader.js';
 
 /**
  * A small, virtual web server emulating Flask (Python).
  */
-declare var pyodide: any;
+
 const router = {
   "/_dash-layout": () => "app.serve_layout()",
   "/_dash-dependencies": () => `
@@ -34,9 +35,9 @@ function postRequest(req, init) {
  * to a compatible Response object.
  * @param codeWillRun stringified python code
  */
-function generateResponse(codeWillRun) {
+async function generateResponse(codeWillRun) {
   console.log("[Pyodide Request]");
-  const flaskRespone = pyodide.runPython(codeWillRun);
+  const { flaskRespone, flaskFailure }  = await asyncRun(codeWillRun);
   const response = new Response(
     flaskRespone['response'][0], {
       headers: Object.fromEntries(new Map(flaskRespone['headers']))

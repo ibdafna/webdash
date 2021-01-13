@@ -1,12 +1,13 @@
+import { asyncRun, run, fsReadDir, fsReadFile } from './worker-loader.js';
+
 async function main() {
-    await languagePluginLoader;
     const indexContent = await injectDashApp();
     const scriptChunk = await generateScripts(indexContent);
     startBootSequence(scriptChunk);
 }
 
 async function injectDashApp() {
-    return pyodide.runPythonAsync(`
+    return asyncRun(`
 ${window.DashApp}
 app.index()
     `)
@@ -14,35 +15,35 @@ app.index()
 
 async function generateScripts(indexContent) {
     document.getElementsByTagName("html")[0].innerHTML = indexContent;
-    return pyodide.runPythonAsync(`
+    return asyncRun(`
         app._generate_scripts_html()
     `)
 }
 
-function startBootSequence(scriptChunk) {
+async function startBootSequence(scriptChunk) {
     const sitePackagesDir = "/lib/python3.8/site-packages/";
     const scriptTags = scriptChunk.split("\n").map(script => {
-        let scriptTag = document.createElement("script");
-        const [ route, dirName, fileName ] = script.match(/(?<=[\/])[^\/]+/g);
-        const fileNamePrefix = fileName.match(/[^.@]+/g)[0];
-        const packageDir = `${sitePackagesDir}${dirName}`;
-        const dirFiles = Module.FS.readdir(packageDir);
+    let scriptTag = document.createElement("script");
+    const [ route, dirName, fileName ] = script.match(/(?<=[\/])[^\/]+/g);
+    const fileNamePrefix = fileName.match(/[^.@]+/g)[0];
+    const packageDir = `${sitePackagesDir}${dirName}`;
+    const dirFiles = await fsReadDir(packageDir);
 
-        // Match requested file names with local copies
-        const scriptFilesToLoad = [];
-        for (const file of dirFiles) {
-            const ext = file.match(/([.@].*\min\.js)/g);
-            const fileName = `${fileNamePrefix}${ext}`;
-            if (file === fileName) {
-                const fullPath = `${packageDir}/${fileName}`;
-                console.log(`Adding script: ${fullPath}`);
-                scriptFilesToLoad.push(fullPath);
-            }
+    // Match requested file names with local copies
+    const scriptFilesToLoad = [];
+    for (const file of dirFiles) {
+        const ext = file.match(/([.@].*\min\.js)/g);
+        const fileName = `${fileNamePrefix}${ext}`;
+        if (file === fileName) {
+            const fullPath = `${packageDir}/${fileName}`;
+            console.log(`Adding script: ${fullPath}`);
+            scriptFilesToLoad.push(fullPath);
         }
+    }
 
         // Generate Blobs for each script tag and return to main page
         scriptFilesToLoad.map(scriptFilePath => {
-            const data = new Blob([Module.FS.readFile(scriptFilePath)], 
+            const data = new Blob([fsReadFile(scriptFilePath)], 
                 { type: 'text/javascript' });
             const url = URL.createObjectURL(data);
             scriptTag.async = false;
@@ -56,7 +57,7 @@ function startBootSequence(scriptChunk) {
 
     function generateScriptBlob(dir, fileName) {
         const scriptTag = document.createElement("script");
-        const data = new Blob([Module.FS.readFile(`${dir}${fileName}`)], 
+        const data = new Blob([fsReadFile(`${dir}${fileName}`)], 
                 { type: 'text/javascript' });
         const url = URL.createObjectURL(data);
         scriptTag.src = url;
@@ -85,7 +86,7 @@ function startBootSequence(scriptChunk) {
     })
 
     // Start up script
-    const rendererStartScript = pyodide.runPython("app.renderer");
+    const rendererStartScript = run("app.renderer");
     const rendererScriptTag = document.createElement("script");
     const scriptBlob = new Blob([rendererStartScript], { type: 'text/javascript' })
     const rendererUrl = URL.createObjectURL(scriptBlob);
