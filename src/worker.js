@@ -10,7 +10,7 @@ async function loadPythonPackages(){
 function fileSystemCall(msgType, param) {
     // console.log("fileSystemCall()", msgType, param);
     const output = pyodide._module.FS[msgType](param);
-    console.log(output);
+    // console.log(output);
     return output
 }
 
@@ -23,7 +23,7 @@ onmessage = async(event) => {
     console.log('[Worker]', event.data);
 
     if (fsCommands) {
-        console.log("in");
+        // console.log("in");
         const { msgType, param } = fsCommands;
         try {
             const result = fileSystemCall(msgType, param);

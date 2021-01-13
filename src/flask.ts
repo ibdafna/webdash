@@ -37,7 +37,8 @@ function postRequest(req, init) {
  */
 async function generateResponse(codeWillRun) {
   console.log("[Pyodide Request]");
-  const { flaskRespone, flaskFailure }  = await asyncRun(codeWillRun);
+  const flaskRespone  = await asyncRun(codeWillRun);
+  console.log("Itay", flaskRespone);
   const response = new Response(
     flaskRespone['response'][0], {
       headers: Object.fromEntries(new Map(flaskRespone['headers']))
@@ -63,10 +64,10 @@ async function fetch(
     let codeWillRun = router[url.pathname]
     if (codeWillRun) {
       console.log(url.pathname)
-      return generateResponse(codeWillRun(req, init));
+      return await generateResponse(codeWillRun(req, init));
     }
 
-     else {
+    else {
       console.log("[Passthrough Reuqest]")
       return originalFetch.apply(this, [req, init]);
     }

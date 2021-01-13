@@ -4,7 +4,10 @@ if (!window.pyodideWorker) {
 
 export function run(script, context, onSuccess, onError){
     pyodideWorker.onerror = onError;
-    pyodideWorker.onmessage = (e) => onSuccess(e.data.results);
+    pyodideWorker.onmessage = (e) => {
+        console.log("[Message received from worker]", e.data);
+        return onSuccess(e.data.results);
+    }
     pyodideWorker.postMessage({
         ...context,
         python: script,
@@ -25,7 +28,11 @@ export function asyncRun(script, context) {
 export async function fsReadDir(dir) {
     return new Promise(function(onSuccess, onError) {
         pyodideWorker.onerror = onError;
-        pyodideWorker.onmessage = (e) => onSuccess(e.data);
+        // pyodideWorker.onmessage = (e) => {
+        //     console.log(e.data);
+        //     return e.data.resuls;
+        // }
+        pyodideWorker.onmessage = (e) => onSuccess(e.data.results);
         pyodideWorker.postMessage(
             {
                 fsCommands:
@@ -41,6 +48,7 @@ export async function fsReadDir(dir) {
 export async function fsReadFile(file) {
     return new Promise(function(onSuccess, onError) {
         pyodideWorker.onerror = onError;
+        // pyodideWorker.onmessage = (e) => console.log(e.data);
         pyodideWorker.onmessage = (e) => onSuccess(e.data.results);
         pyodideWorker.postMessage(
             {
