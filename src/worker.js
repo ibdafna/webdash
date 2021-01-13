@@ -1,15 +1,13 @@
 self.languagePluginUrl = 'http://localhost:9999/';
 importScripts('http://localhost:9999/pyodide.js');
 
-console.log("[Inside Worker]")
-
 let pythonLoading;
 async function loadPythonPackages(){
     await languagePluginLoader;
-    pythonLoading = self.pyodide.loadPackage(['numpy', 'pytz']);
+    pythonLoading = self.pyodide.loadPackage([]);
 }
 
-var onmessage = async(event) => {
+onmessage = async(event) => {
     await languagePluginLoader;
      // since loading package is asynchronous, we need to make sure loading is done:
     await pythonLoading;
