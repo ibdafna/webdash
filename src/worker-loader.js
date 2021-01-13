@@ -5,4 +5,3 @@ pyodideWorker.onmessage = ({ data }) => {
 }
 
 pyodideWorker.postMessage({python:"print('nonsense')"})
-
