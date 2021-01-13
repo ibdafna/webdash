@@ -23,23 +23,23 @@ async function generateScripts(indexContent) {
 async function startBootSequence(scriptChunk) {
     const sitePackagesDir = "/lib/python3.8/site-packages/";
     const scriptTags = scriptChunk.split("\n").map(script => {
-    let scriptTag = document.createElement("script");
-    const [ route, dirName, fileName ] = script.match(/(?<=[\/])[^\/]+/g);
-    const fileNamePrefix = fileName.match(/[^.@]+/g)[0];
-    const packageDir = `${sitePackagesDir}${dirName}`;
-    const dirFiles = await fsReadDir(packageDir);
+        let scriptTag = document.createElement("script");
+        const [ route, dirName, fileName ] = script.match(/(?<=[\/])[^\/]+/g);
+        const fileNamePrefix = fileName.match(/[^.@]+/g)[0];
+        const packageDir = `${sitePackagesDir}${dirName}`;
+        const dirFiles = await fsReadDir(packageDir);
 
-    // Match requested file names with local copies
-    const scriptFilesToLoad = [];
-    for (const file of dirFiles) {
-        const ext = file.match(/([.@].*\min\.js)/g);
-        const fileName = `${fileNamePrefix}${ext}`;
-        if (file === fileName) {
-            const fullPath = `${packageDir}/${fileName}`;
-            console.log(`Adding script: ${fullPath}`);
-            scriptFilesToLoad.push(fullPath);
+        // Match requested file names with local copies
+        const scriptFilesToLoad = [];
+        for (const file of dirFiles) {
+            const ext = file.match(/([.@].*\min\.js)/g);
+            const fileName = `${fileNamePrefix}${ext}`;
+            if (file === fileName) {
+                const fullPath = `${packageDir}/${fileName}`;
+                console.log(`Adding script: ${fullPath}`);
+                scriptFilesToLoad.push(fullPath);
+            }
         }
-    }
 
         // Generate Blobs for each script tag and return to main page
         scriptFilesToLoad.map(scriptFilePath => {
