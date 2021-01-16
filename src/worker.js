@@ -20,10 +20,9 @@ onmessage = async(event) => {
     await pythonLoading;
     // Don't bother yet with this line, suppose our API is built in such a way:
     const { python, fsCommands, ...context } = event.data;
-    console.log('[Worker]', event.data);
+    console.log('[3. Worker]', event.data);
 
     if (fsCommands) {
-        // console.log("in");
         const { msgType, param } = fsCommands;
         try {
             const result = fileSystemCall(msgType, param);

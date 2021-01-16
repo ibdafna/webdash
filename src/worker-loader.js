@@ -2,11 +2,29 @@ if (!window.pyodideWorker) {
     window.pyodideWorker = new Worker('./worker.js');
 }
 
+class ResponseQueue {
+    constructor() {
+        this.queue = [];
+    }
+
+    enqueue(onSuccessFn) {
+        return this.queue.push(onSuccessFn);
+    }
+
+    dequeue() {
+        return this.queue.shift();
+    }
+}
+
+const messageQueue = new ResponseQueue();
+
 export function run(script, context, onSuccess, onError){
-    pyodideWorker.onerror = onError;
+    messageQueue.enqueue(onSuccess);
+    pyodideWorker.onerror = (e) => onError(e);
     pyodideWorker.onmessage = (e) => {
-        console.log("[Message received from worker]", e.data);
-        return onSuccess(e.data.results);
+        console.log("[4. Message received from worker]", e.data);
+        const success = messageQueue.dequeue();
+        return success(e.data.results);
     }
     pyodideWorker.postMessage({
         ...context,
