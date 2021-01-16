@@ -10,8 +10,31 @@ async function loadPythonPackages(){
 function fileSystemCall(msgType, param) {
     // console.log("fileSystemCall()", msgType, param);
     const output = pyodide._module.FS[msgType](param);
-    // console.log(output);
+    console.log(output);
     return output
+}
+
+function handleFsCommands(fsCommands) {
+    const { msgType, param } = fsCommands;
+    try {
+        const result = fileSystemCall(msgType, param);
+        msgType === 'readFile' 
+            ? postMessageTransferable(result, [result.buffer])
+            : postMessageRegular(result);
+    }
+    catch (error) {
+        postMessageRegular(error);
+    }
+}
+
+async function handlePythonCode(python) {
+    const result = await self.pyodide.runPythonAsync(python);
+    try {
+        postMessageRegular(result);
+    }
+    catch (error){
+        postMessageError(error);
+    }
 }
 
 onmessage = async(event) => {
@@ -23,18 +46,7 @@ onmessage = async(event) => {
     console.log('[3. Worker]', event.data);
 
     if (fsCommands) {
-        const { msgType, param } = fsCommands;
-        try {
-            const result = fileSystemCall(msgType, param);
-            self.postMessage({
-                results: result
-            })
-        }
-        catch (error) {
-            self.postMessage({
-                error: error.message
-            })
-        }
+        handleFsCommands(fsCommands);
     }
 
     else {
@@ -42,16 +54,30 @@ onmessage = async(event) => {
         for (const key of Object.keys(context)){
             self[key] = context[key];
         }
-        // Now is the easy part, the one that is similar to working in the main thread:
-        try {
-            self.postMessage({
-                results: await self.pyodide.runPythonAsync(python)
-            });
-        }
-        catch (error){
-            self.postMessage(
-                {error : error.message}
-            );
-        }
+        handlePythonCode(python);
     }
+}
+
+
+/**
+ * Message post functions.
+ */
+
+function postMessageRegular(object) {
+    self.postMessage({
+        results: object
+    })
+}
+
+function postMessageTransferable(object, transferable) {
+    self.postMessage({
+        results: object
+    }, 
+    transferable);
+}
+
+function postMessageError(error) {
+    self.postMessage({
+        error: error.message
+    });
 }
