@@ -1,16 +1,20 @@
+import { asyncRun } from './worker-loader.js';
 
 /**
  * A small, virtual web server emulating Flask (Python).
  */
-declare var pyodide: any;
+
 const router = {
-  "/_dash-layout": () => "app.serve_layout()",
+  "/_dash-layout": () => `
+        x = app.serve_layout()
+        x = {"response": x.get_data(as_text=True), "headers": x.headers}
+        x`,
   "/_dash-dependencies": () => `
       with app.server.app_context(): 
         x = app.dependencies()
+        x = {"response": x.get_data(as_text=True), "headers": x.headers}
       x`,
-  "/_dash-update-component": postRequest,
-  "/_reload-hash": () => "app.serve_reload_hash()"
+  "/_dash-update-component": postRequest
 }
 
 /**
@@ -25,6 +29,7 @@ function postRequest(req, init) {
       data='''${init.body}''', 
       content_type="application/json"): 
       x = app.dispatch()
+      x = {"response": x.get_data(as_text=True), "headers": x.headers}
     x`
 }
 
@@ -34,11 +39,12 @@ function postRequest(req, init) {
  * to a compatible Response object.
  * @param codeWillRun stringified python code
  */
-function generateResponse(codeWillRun) {
-  console.log("[Pyodide Request]");
-  const flaskRespone = pyodide.runPython(codeWillRun);
+async function generateResponse(codeWillRun) {
+  console.log("[2. Flask Request Generated]");
+  const flaskRespone  = await asyncRun(codeWillRun);
+  console.log("[5. Flask Response Received]", flaskRespone);
   const response = new Response(
-    flaskRespone['response'][0], {
+    flaskRespone['response'], {
       headers: Object.fromEntries(new Map(flaskRespone['headers']))
     }
   )
@@ -56,16 +62,18 @@ async function fetch(
     init?: RequestInit | null | undefined
   ): Promise<Response> {
     // TODO: handle raw requests in addition to strings
-    console.log('[Request Intercepted]', req, init);
+    console.log('[1. Request Intercepted]', req, init);
     const url = new URL(new Request(req).url);
 
     let codeWillRun = router[url.pathname]
     if (codeWillRun) {
       console.log(url.pathname)
-      return generateResponse(codeWillRun(req, init));
+      const resp = await generateResponse(codeWillRun(req, init));
+      console.log(`[6. ${url.pathname} done.]`, resp)
+      return resp;
     }
 
-     else {
+    else {
       console.log("[Passthrough Reuqest]")
       return originalFetch.apply(this, [req, init]);
     }
