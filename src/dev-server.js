@@ -1,18 +1,20 @@
 import path from "path";
 import Bundler from "parcel-bundler";
-import fenceHttp from "./server/http_server.js";
+import SimpleHTTPServer from "./server/https_server.js";
 
+// Env vars
 let [, , port, servePath, ssl] = process.argv;
 port = Number.parseInt(port) || 8080;
 servePath = servePath || "dist";
 ssl = true;
 
 const entryFiles = path.join(path.resolve("./src"), "index.html");
+console.log(entryFiles);
 const bundler = new Bundler(entryFiles, {});
 bundler.bundle();
 bundler.on("bundled", () => {
   console.log("Bundled haha");
 });
 
-const fenceHttpServer = new fenceHttp.FenceHTTPServer(port, servePath, ssl);
-fenceHttpServer.serve();
+const webDashServer = new SimpleHTTPServer(port, servePath, ssl);
+webDashServer.serve();
