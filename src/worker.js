@@ -1,5 +1,5 @@
-self.languagePluginUrl = "https://localhost:8080/";
-importScripts("https://localhost:8080/pyodide.js");
+self.languagePluginUrl = `https://${location.hostname}:${location.port}/`;
+importScripts(`https://${location.hostname}:${location.port}/pyodide.js`);
 
 let pythonLoading;
 async function loadPythonPackages() {
