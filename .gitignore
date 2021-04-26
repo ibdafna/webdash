@@ -1,6 +1,6 @@
 .cache
 dash
-dist
 node_modules
 package-lock.json
+dist
 pyodide
