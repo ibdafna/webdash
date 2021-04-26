@@ -1,17 +1,38 @@
-self.languagePluginUrl = `https://${location.hostname}:${location.port}/`;
+// self.languagePluginUrl = `https://${location.hostname}:${location.port}/`;
 importScripts(`https://${location.hostname}:${location.port}/pyodide.js`);
 
-let pythonLoading;
-async function loadPythonPackages() {
-  await languagePluginLoader;
-  pythonLoading = self.pyodide.loadPackage([]);
+async function loadPyodideAndPackages() {
+  await loadPyodide({
+    indexURL: `https://${location.hostname}:${location.port}/`,
+  });
+  await self.pyodide.loadPackage([]);
 }
+
+let pyodideReadyPromise = loadPyodideAndPackages();
 
 function fileSystemCall(msgType, param) {
   // console.log("fileSystemCall()", msgType, param);
   const output = pyodide._module.FS[msgType](param);
   console.log(output);
   return output;
+}
+
+function generateResponseObject(pythonResponse) {
+  const responseBody = pythonResponse.get_data((as_text = true));
+  const headerKeys = pythonResponse.headers.keys();
+  const returnObject = {
+    response: responseBody,
+    headers: Array.from(headerKeys).reduce(
+      (acc, val) => ((acc[val] = pythonResponse.headers.get(val)), acc),
+      {}
+    ),
+  };
+
+  // Clean up Proxy Object so we don't leak memory
+  headerKeys.destroy();
+  pythonResponse.destroy();
+
+  return returnObject;
 }
 
 function handleFsCommands(fsCommands) {
@@ -27,7 +48,11 @@ function handleFsCommands(fsCommands) {
 }
 
 async function handlePythonCode(python) {
-  const result = await self.pyodide.runPythonAsync(python);
+  let result = await self.pyodide.runPythonAsync(python);
+  // Processing Proxy objects before sending.
+  if (pyodide.isPyProxy(result)) {
+    result = generateResponseObject(result);
+  }
   try {
     postMessageRegular(result);
   } catch (error) {
@@ -36,10 +61,9 @@ async function handlePythonCode(python) {
 }
 
 onmessage = async (event) => {
-  await languagePluginLoader;
-  // since loading package is asynchronous, we need to make sure loading is done:
-  await pythonLoading;
-  // Don't bother yet with this line, suppose our API is built in such a way:
+  // Making sure we don't arrive early at the party.
+  await pyodideReadyPromise;
+
   const { python, fsCommands, ...context } = event.data;
   console.log("[3. Worker]", event.data);
 
