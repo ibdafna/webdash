@@ -1,0 +1,344 @@
+diff --git a/packages/click/meta.yaml b/packages/click/meta.yaml
+new file mode 100644
+index 0000000..fdeab9c
+--- /dev/null
++++ b/packages/click/meta.yaml
+@@ -0,0 +1,9 @@
++package:
++  name: click
++  version: 7.1.2
++source:
++  sha256: d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a
++  url: https://files.pythonhosted.org/packages/27/6f/be940c8b1f1d69daceeb0032fee6c34d7bd70e3e649ccac0951500b4720e/click-7.1.2.tar.gz
++test:
++  imports:
++  - click
+diff --git a/packages/dash-core-components/meta.yaml b/packages/dash-core-components/meta.yaml
+new file mode 100644
+index 0000000..cf55695
+--- /dev/null
++++ b/packages/dash-core-components/meta.yaml
+@@ -0,0 +1,9 @@
++package:
++  name: dash-core-components
++  version: 1.14.1
++source:
++  sha256: 55423dfe0ede92b2efdb6dee6b7d44be141ca1e2e06f1a0effd4e7c83c929d4d
++  url: https://files.pythonhosted.org/packages/0f/ab/5ffeeed41117383d02485f5b9204dcfaa074bfbb3ff2559afac7b904ad5c/dash_core_components-1.14.1.tar.gz
++test:
++  imports:
++  - dash-core-components
+diff --git a/packages/dash-html-components/meta.yaml b/packages/dash-html-components/meta.yaml
+new file mode 100644
+index 0000000..2e7aaaf
+--- /dev/null
++++ b/packages/dash-html-components/meta.yaml
+@@ -0,0 +1,9 @@
++package:
++  name: dash-html-components
++  version: 1.1.1
++source:
++  sha256: 2c662e640528c890aaa0fa23d48e51c4d13ce69a97841d856ddcaaf2c6a47be3
++  url: https://files.pythonhosted.org/packages/02/ba/bb9427c62feb25bfbaf243894eeeb4e7c67a92b426ed0575a167100e436e/dash_html_components-1.1.1.tar.gz
++test:
++  imports:
++  - dash-html-components
+diff --git a/packages/dash-renderer/meta.yaml b/packages/dash-renderer/meta.yaml
+new file mode 100644
+index 0000000..7e6b8c0
+--- /dev/null
++++ b/packages/dash-renderer/meta.yaml
+@@ -0,0 +1,9 @@
++package:
++  name: dash-renderer
++  version: 1.8.3
++source:
++  sha256: f7ab2b922f4f0850bae0e9793cec99f8a1a241e5f7f5786e367ddd9e41d2b170
++  url: https://files.pythonhosted.org/packages/72/fe/59a322edb128ad15205002c7b81e3f5e580f6791c4a100183289e05dbfcb/dash_renderer-1.8.3.tar.gz
++test:
++  imports:
++  - dash-renderer
+diff --git a/packages/dash/meta.yaml b/packages/dash/meta.yaml
+new file mode 100644
+index 0000000..f8ff7ed
+--- /dev/null
++++ b/packages/dash/meta.yaml
+@@ -0,0 +1,22 @@
++package:
++  name: dash
++  version: "1.18.1"
++source:
++  sha256: f4f82d63db13c19e15c01fc865fb35f32cb861dab36c372ccd79c96ee699a882
++  url: https://files.pythonhosted.org/packages/dd/17/55244363969638edd1151de0ea4aa10e6a7849b42d7d0994e3082514e19d/dash-1.18.1.tar.gz
++  patches:
++    - patches/disable_compression.patch
++requirements:
++  run:
++    - distlib
++    - future
++    - dash-renderer
++    - flask
++    - werkzeug
++    - plotly
++    - six
++    - dash-core-components
++    - dash-html-components
++test:
++  imports:
++  - dash
+diff --git a/packages/dash/patches/disable_compression.patch b/packages/dash/patches/disable_compression.patch
+new file mode 100644
+index 0000000..aea029e
+--- /dev/null
++++ b/packages/dash/patches/disable_compression.patch
+@@ -0,0 +1,151 @@
++diff --git a/dash/dash.py b/dash/dash.py
++index 54fc4c9b..67a6a2ee 100644
++--- a/dash/dash.py
+++++ b/dash/dash.py
++@@ -18,9 +18,9 @@ from functools import wraps
++ from future.moves.urllib.parse import urlparse
++ 
++ import flask
++-from flask_compress import Compress
+++# from flask_compress import Compress
++ from werkzeug.debug.tbtools import get_current_traceback
++-from pkg_resources import get_distribution, parse_version
+++# from pkg_resources import get_distribution, parse_version
++ 
++ import plotly
++ import dash_renderer
++@@ -50,7 +50,7 @@ from ._utils import (
++ from . import _validate
++ from . import _watch
++ 
++-_flask_compress_version = parse_version(get_distribution("flask-compress").version)
+++# _flask_compress_version = parse_version(get_distribution("flask-compress").version)
++ 
++ # Add explicit mapping for map files
++ mimetypes.add_type("application/json", ".map", True)
++@@ -259,7 +259,7 @@ class Dash(object):
++         requests_pathname_prefix=None,
++         routes_pathname_prefix=None,
++         serve_locally=True,
++-        compress=None,
+++        compress=False, # Setting this to false as not needed in pyodide context.
++         meta_tags=None,
++         index_string=_default_index,
++         external_scripts=None,
++@@ -281,20 +281,24 @@ class Dash(object):
++             if name is None:
++                 name = getattr(server, "name", "__main__")
++         elif isinstance(server, bool):
++-            name = name if name else "__main__"
+++            # name = name if name else "__main__" 
+++            name = "webFlask"
++             self.server = flask.Flask(name) if server else None
++         else:
++             raise ValueError("server must be a Flask app or a boolean")
++ 
++-        if (
++-            self.server is not None
++-            and not hasattr(self.server.config, "COMPRESS_ALGORITHM")
++-            and _flask_compress_version >= parse_version("1.6.0")
++-        ):
++-            # flask-compress==1.6.0 changed default to ['br', 'gzip']
++-            # and non-overridable default compression with Brotli is
++-            # causing performance issues
++-            self.server.config["COMPRESS_ALGORITHM"] = ["gzip"]
+++
+++        # Removing any compressions information
+++
+++        # if (
+++        #     self.server is not None
+++        #     and not hasattr(self.server.config, "COMPRESS_ALGORITHM")
+++        #     and _flask_compress_version >= parse_version("1.6.0")
+++        # ):
+++        #     # flask-compress==1.6.0 changed default to ['br', 'gzip']
+++        #     # and non-overridable default compression with Brotli is
+++        #     # causing performance issues
+++        #     self.server.config["COMPRESS_ALGORITHM"] = ["gzip"]
++ 
++         base_prefix, routes_prefix, requests_prefix = pathname_configs(
++             url_base_pathname, routes_pathname_prefix, requests_pathname_prefix
++@@ -1051,6 +1055,7 @@ class Dash(object):
++ 
++     def dispatch(self):
++         body = flask.request.get_json()
+++        print(body)
++         flask.g.inputs_list = inputs = body.get("inputs", [])
++         flask.g.states_list = state = body.get("state", [])
++         output = body["output"]
++diff --git a/setup.py b/setup.py
++index 1deddfd0..5d488d06 100644
++--- a/setup.py
+++++ b/setup.py
++@@ -1,10 +1,5 @@
++-import io
++ from setuptools import setup, find_packages
++ 
++-main_ns = {}
++-exec(open("dash/version.py").read(), main_ns)  # pylint: disable=exec-used
++-
++-
++ def read_req_file(req_type):
++     with open("requires-{}.txt".format(req_type)) as fp:
++         requires = (line.strip() for line in fp)
++@@ -13,7 +8,7 @@ def read_req_file(req_type):
++ 
++ setup(
++     name="dash",
++-    version=main_ns["__version__"],
+++    version="0.1",
++     author="Chris Parmer",
++     author_email="chris@plotly.com",
++     packages=find_packages(exclude=["tests*"]),
++@@ -23,48 +18,5 @@ setup(
++         "A Python framework for building reactive web-apps. "
++         "Developed by Plotly."
++     ),
++-    long_description=io.open("README.md", encoding="utf-8").read(),
++-    long_description_content_type="text/markdown",
++-    install_requires=read_req_file("install"),
++-    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*",
++-    extras_require={
++-        "dev": read_req_file("dev"),
++-        "testing": read_req_file("testing"),
++-    },
++-    entry_points={
++-        "console_scripts": [
++-            "dash-generate-components = "
++-            "dash.development.component_generator:cli",
++-            "renderer = dash.development.build_process:renderer",
++-        ],
++-        "pytest11": ["dash = dash.testing.plugin"],
++-    },
++-    url="https://plotly.com/dash",
++-    classifiers=[
++-        "Development Status :: 5 - Production/Stable",
++-        "Environment :: Web Environment",
++-        "Framework :: Dash",
++-        "Framework :: Flask",
++-        "Intended Audience :: Developers",
++-        "Intended Audience :: Education",
++-        "Intended Audience :: Financial and Insurance Industry",
++-        "Intended Audience :: Healthcare Industry",
++-        "Intended Audience :: Manufacturing",
++-        "Intended Audience :: Science/Research",
++-        "License :: OSI Approved :: MIT License",
++-        "Programming Language :: Python",
++-        "Programming Language :: Python :: 2",
++-        "Programming Language :: Python :: 2.7",
++-        "Programming Language :: Python :: 3",
++-        "Programming Language :: Python :: 3.3",
++-        "Programming Language :: Python :: 3.4",
++-        "Programming Language :: Python :: 3.5",
++-        "Programming Language :: Python :: 3.6",
++-        "Programming Language :: Python :: 3.7",
++-        "Topic :: Database :: Front-Ends",
++-        "Topic :: Office/Business :: Financial :: Spreadsheet",
++-        "Topic :: Scientific/Engineering :: Visualization",
++-        "Topic :: Software Development :: Libraries :: Application Frameworks",
++-        "Topic :: Software Development :: Widget Sets",
++-    ],
+++    install_requires=read_req_file("install")
++ )
+diff --git a/packages/flask/meta.yaml b/packages/flask/meta.yaml
+new file mode 100755
+index 0000000..c114901
+--- /dev/null
++++ b/packages/flask/meta.yaml
+@@ -0,0 +1,15 @@
++package:
++  name: flask
++  version: 1.1.2
++source:
++  sha256: 4efa1ae2d7c9865af48986de8aeb8504bf32c7f3d6fdc9353d34b21f4b127060
++  url: https://files.pythonhosted.org/packages/4e/0b/cb02268c90e67545a0e3a37ea1ca3d45de3aca43ceb7dbf1712fb5127d5d/Flask-1.1.2.tar.gz
++test:
++  imports:
++  - flask
++requirements:
++  run:
++    - Jinja2
++    - werkzeug
++    - itsdangerous
++    - click
+\ No newline at end of file
+diff --git a/packages/itsdangerous/meta.yaml b/packages/itsdangerous/meta.yaml
+new file mode 100644
+index 0000000..5fbabfb
+--- /dev/null
++++ b/packages/itsdangerous/meta.yaml
+@@ -0,0 +1,9 @@
++package:
++  name: itsdangerous
++  version: 1.1.0
++source:
++  sha256: 321b033d07f2a4136d3ec762eac9f16a10ccd60f53c0c91af90217ace7ba1f19
++  url: https://files.pythonhosted.org/packages/68/1a/f27de07a8a304ad5fa817bbe383d1238ac4396da447fa11ed937039fa04b/itsdangerous-1.1.0.tar.gz
++test:
++  imports:
++  - itsdangerous
+diff --git a/packages/jinja2/meta.yaml b/packages/jinja2/meta.yaml
+new file mode 100644
+index 0000000..847fede
+--- /dev/null
++++ b/packages/jinja2/meta.yaml
+@@ -0,0 +1,9 @@
++package:
++  name: jinja2
++  version: 2.11.2
++source:
++  sha256: 89aab215427ef59c34ad58735269eb58b1a5808103067f7bb9d5836c651b3bb0
++  url: https://files.pythonhosted.org/packages/64/a7/45e11eebf2f15bf987c3bc11d37dcc838d9dc81250e67e4c5968f6008b6c/Jinja2-2.11.2.tar.gz
++test:
++  imports:
++  - jinja2
+diff --git a/packages/plotly/meta.yaml b/packages/plotly/meta.yaml
+index d8b5a62..b6f77aa 100644
+--- a/packages/plotly/meta.yaml
++++ b/packages/plotly/meta.yaml
+@@ -1,13 +1,12 @@
+ package:
+   name: plotly
+-  version: 4.14.3
++  version: 4.14.1
+ source:
+   sha256: 7d8aaeed392e82fb8e0e48899f2d3d957b12327f9d38cdd5802bc574a8a39d91
+   url: https://files.pythonhosted.org/packages/7f/69/2acf801ff56af4cca6a2d0e17108770c42eeb5596919254c5acbcf23efaf/plotly-4.14.3.tar.gz
+ requirements:
+   run:
+-    - retrying
+     - six
+ test:
+   imports:
+-  - plotly
++    - plotly
+diff --git a/packages/six/meta.yaml b/packages/six/meta.yaml
+index bc51d59..c096703 100644
+--- a/packages/six/meta.yaml
++++ b/packages/six/meta.yaml
+@@ -1,6 +1,6 @@
+ package:
+   name: six
+-  version: 1.15.0
++  version: 1.11.0
+ source:
+   sha256: 30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259
+   url: https://files.pythonhosted.org/packages/6b/34/415834bfdafca3c5f451532e8a8d9ba89a21c9743a0c59fbd0205c7f9426/six-1.15.0.tar.gz
+diff --git a/packages/werkzeug/meta.yaml b/packages/werkzeug/meta.yaml
+new file mode 100644
+index 0000000..0a347b6
+--- /dev/null
++++ b/packages/werkzeug/meta.yaml
+@@ -0,0 +1,9 @@
++package:
++  name: werkzeug
++  version: 1.0.1
++source:
++  sha256: 6c80b1e5ad3665290ea39320b91e1be1e0d5f60652b964a3070216de83d2e47c
++  url: https://files.pythonhosted.org/packages/10/27/a33329150147594eff0ea4c33c2036c0eadd933141055be0ff911f7f8d04/Werkzeug-1.0.1.tar.gz
++test:
++  imports:
++  - werkzeug
