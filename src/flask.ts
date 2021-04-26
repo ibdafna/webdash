@@ -7,12 +7,10 @@ import { asyncRun } from './worker-loader.js';
 const router = {
   "/_dash-layout": () => `
         x = app.serve_layout()
-        x = {"response": x.get_data(as_text=True), "headers": x.headers}
         x`,
   "/_dash-dependencies": () => `
       with app.server.app_context(): 
         x = app.dependencies()
-        x = {"response": x.get_data(as_text=True), "headers": x.headers}
       x`,
   "/_dash-update-component": postRequest
 }
@@ -29,7 +27,6 @@ function postRequest(req, init) {
       data='''${init.body}''', 
       content_type="application/json"): 
       x = app.dispatch()
-      x = {"response": x.get_data(as_text=True), "headers": x.headers}
     x`
 }
 
@@ -45,7 +42,7 @@ async function generateResponse(codeWillRun) {
   console.log("[5. Flask Response Received]", flaskRespone);
   const response = new Response(
     flaskRespone['response'], {
-      headers: Object.fromEntries(new Map(flaskRespone['headers']))
+      headers: flaskRespone['headers']
     }
   )
   return response;
@@ -74,7 +71,7 @@ async function fetch(
     }
 
     else {
-      console.log("[Passthrough Reuqest]")
+      console.log("[Passthrough Request]")
       return originalFetch.apply(this, [req, init]);
     }
   }
