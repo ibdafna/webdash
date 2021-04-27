@@ -13,7 +13,7 @@ console.log(entryFiles);
 const bundler = new Bundler(entryFiles, {});
 bundler.bundle();
 bundler.on("bundled", () => {
-  console.log("Bundled haha");
+  console.log("WebDash changes have been bundled.");
 });
 
 const webDashServer = new SimpleHTTPServer(port, servePath, ssl);

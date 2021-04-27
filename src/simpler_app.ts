@@ -1,5 +1,5 @@
 //@ts-ignore
-window.DashApp = `
+window.dashApp = `
 import json
 
 import dash
@@ -117,4 +117,4 @@ def display_relayout_data(relayoutData):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-`
+`;
