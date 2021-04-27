@@ -1,5 +1,3 @@
-import { ErrorCallback } from "typescript";
-
 /**
  * A small queue where we queue "OnSuccess" functions
  * for each request sent. For each request, a success
@@ -36,6 +34,13 @@ export class WorkerManager {
     this.worker = new Worker("./worker.js");
   }
 
+  /**
+   * Runs Python code on the WebWorker.
+   * @param script python script
+   * @param context additional payload
+   * @param onSuccess callback function if executed successfully
+   * @param onError callback function for if errored
+   */
   run(
     script: string,
     context: Payload,
@@ -56,7 +61,7 @@ export class WorkerManager {
   }
 
   /**
-   * Runs a Python script on the WebWorker
+   * Runs a Python script on the WebWorker.
    * @param script python script to run
    * @param context optional additional arguments
    * @returns BlobPart or string
@@ -69,6 +74,11 @@ export class WorkerManager {
     );
   }
 
+  /**
+   * Reads a directory from the virtual file system.
+   * @param dir directory name
+   * @returns a list of files present in the directory
+   */
   async fsReadDir(dir: string): Promise<string> {
     return new Promise(
       (onSuccess: Function, onError: (e: ErrorEvent) => any) => {
@@ -84,6 +94,11 @@ export class WorkerManager {
     );
   }
 
+  /**
+   * Reads a file from the virtual file system.
+   * @param file filename
+   * @returns a binary array with the file content
+   */
   async fsReadFile(file: string): Promise<BlobPart | string> {
     return new Promise(
       (onSuccess: Function, onError: (e: ErrorEvent) => any) => {
