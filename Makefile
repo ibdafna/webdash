@@ -11,5 +11,16 @@ copy_build:
 	cd dist; \
 	cp -r ../pyodide/build/*.* .;
 
-clean:
-	rm -rf pyodide dist;
+delete_dist:
+	rm -rf dist;
+
+make_dist:
+	mkdir dist;
+
+clean: delete_dist make_dist copy_build
+	rm -rf .cache
+
+webdash_build:
+	npm run build;
+
+all: clean webdash_build
