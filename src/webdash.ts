@@ -10,6 +10,13 @@ declare global {
   }
 }
 
+/**
+ * The entry point for WebDash. It is responsible for
+ * instantiating and coordinating the different
+ * components which make up the communication
+ * between the Dash frontend and the virtual
+ * Flask backend running in WASM.
+ */
 class WebDash {
   constructor() {
     window.workerManager = new WorkerManager();
@@ -70,7 +77,7 @@ app.index()
           const data = new Blob(
             [await window.workerManager.fsReadFile(fullPath)],
             {
-              type: "text/javascript"
+              type: "text/javascript",
             }
           );
           console.log("Daaata", data);
@@ -91,7 +98,7 @@ app.index()
       const data = new Blob(
         [await window.workerManager.fsReadFile(`${dir}${fileName}`)],
         {
-          type: "text/javascript"
+          type: "text/javascript",
         }
       );
       console.log("More data", data);
@@ -102,6 +109,10 @@ app.index()
     }
 
     // TODO: actually load these async..
+    // An alternative would be to bundle these files
+    // in the dist folder and let the HTTP server
+    // serve then on request.
+    //
     // Dash core components
     const dccDir = `${sitePackagesDir}dash_core_components/`;
     const dccFiles = [
@@ -112,7 +123,7 @@ app.index()
       "async-dropdown.js",
       "async-slider.js",
       "dash_core_components.min.js",
-      "dash_core_components-shared.js"
+      "dash_core_components-shared.js",
     ];
 
     for (const fileName of dccFiles) {
@@ -132,7 +143,7 @@ app.index()
       const scriptBlob = new Blob(
         [await window.workerManager.asyncRun("app.renderer", {})],
         {
-          type: "text/javascript"
+          type: "text/javascript",
         }
       );
       const rendererUrl = URL.createObjectURL(scriptBlob);
@@ -143,7 +154,7 @@ app.index()
     }
 
     await generateStartupScript();
-    scriptTags.forEach(script => footer.appendChild(script));
+    scriptTags.forEach((script) => footer.appendChild(script));
   }
 
   workerManager: WorkerManager;
