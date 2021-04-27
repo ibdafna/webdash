@@ -24,6 +24,10 @@ class WebDash {
     this.main();
   }
 
+  /**
+   * Used as the "boot sequence" for getting
+   * the Dash application up and running.
+   */
   async main() {
     const indexContent = await this.injectDashApp();
     const scriptChunk = await this.generateScripts(indexContent);
@@ -93,6 +97,8 @@ app.index()
 
     const footer = document.getElementsByTagName("footer")[0];
 
+    // TODO: Standardise this function for any async loading
+    //       of files from the virtual file system
     async function generateScriptBlob(dir, fileName) {
       const scriptTag = document.createElement("script");
       const data = new Blob(
