@@ -1,4 +1,3 @@
-// self.languagePluginUrl = `https://${location.hostname}:${location.port}/`;
 importScripts(`https://${location.hostname}:${location.port}/pyodide.js`);
 
 async function loadPyodideAndPackages() {
@@ -102,7 +101,3 @@ function postMessageError(error) {
     error: error.message,
   });
 }
-
-// var uint8array = new TextEncoder("utf-8").encode("Plain Text");
-// var string = new TextDecoder().decode(uint8array);
-// console.log(uint8array ,string )
