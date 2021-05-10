@@ -1,3 +1,4 @@
+import { log } from "./webdash";
 /**
  * A small queue where we queue "OnSuccess" functions
  * for each request sent. For each request, a success
@@ -50,7 +51,7 @@ export class WorkerManager {
     this.queue.enqueue(onSuccess);
     this.worker.onerror = (e) => onError(e);
     this.worker.onmessage = (e) => {
-      console.log("[4. Message received from worker]", e.data);
+      log("[4. Message received from worker]", e.data);
       const success = this.queue.dequeue();
       return success(e.data.results);
     };
