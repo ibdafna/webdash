@@ -14,11 +14,13 @@ export class WebFlask {
           with app.server.app_context(): 
             x = app.dependencies()
           x`,
-      "/_dash-update-component": this.postRequest
+      "/_dash-update-component": this.postRequest,
     };
     this.worker = window.workerManager;
     this.originalFetch = window.fetch;
+    this.originalXHROpen = window.XMLHttpRequest.prototype.open;
     window.fetch = this.fetch.bind(this);
+    window.XMLHttpRequest.prototype.open = this.xmlHttpRequestOpen.bind(this);
   }
 
   /**
@@ -46,7 +48,7 @@ export class WebFlask {
     const flaskRespone = await this.worker.asyncRun(codeWillRun, {});
     console.log("[5. Flask Response Received]", flaskRespone);
     const response = new Response(flaskRespone["response"], {
-      headers: flaskRespone["headers"]
+      headers: flaskRespone["headers"],
     });
     return response;
   }
@@ -77,9 +79,23 @@ export class WebFlask {
     }
   }
 
+  /**
+   * Hooks into the 'open' method of XMLHttpRequest. This
+   * allows us to intercept get requests and redirect them
+   * to the Flask backend when appropriate.
+   */
+  xmlHttpRequestOpen(method, url, async, user, password): void {
+    console.log(arguments);
+    console.log("Method: ", method);
+    console.log("URL: ", url);
+
+    return this.originalXHROpen.apply(this, arguments);
+  }
+
   router: Router;
   worker: WorkerManager;
   originalFetch: (request: any, response: any) => Promise<Response>;
+  originalXHROpen: Function;
 }
 
 type Router = { [key: string]: Function };
