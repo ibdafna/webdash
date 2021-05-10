@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node src/dev-server.js 8080 dist true",
+    "dev": "NODE_ENV=development node src/dev-server.js 8080 dist true",
     "build": "parcel build src/index.html"
   },
   "author": "Bloomberg LP",
