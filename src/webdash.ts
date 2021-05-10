@@ -7,6 +7,22 @@ declare global {
     workerManager: WorkerManager;
     dashApp: string;
     webDash: WebDash;
+    log: Function;
+  }
+}
+
+/**
+ * Enables debug logs for development environments.
+ */
+let dev = false;
+if (process.env.NODE_ENV === "development") {
+  log("Worked");
+  dev = true;
+}
+
+export function log(...args) {
+  if (dev) {
+    console.log(...args);
   }
 }
 
@@ -33,9 +49,9 @@ class WebDash {
     const indexContent = await this.injectDashApp();
     const scriptChunk = await this.generateScripts(indexContent);
     await this.populateFileMap();
-    console.log("Before");
+    log("Before");
     await this.startBootSequence(scriptChunk);
-    console.log("After");
+    log("After");
   }
 
   async injectDashApp() {
@@ -78,7 +94,7 @@ app.index()
         const fileName = `${fileNamePrefix}${ext}`;
         if (file === fileName) {
           const fullPath = `${packageDir}/${fileName}`;
-          console.log(`Adding script: ${fullPath}`);
+          log(`Adding script: ${fullPath}`);
           //scriptFilesToLoad.push(fullPath);
           const data = new Blob(
             [await window.workerManager.fsReadFile(fullPath)],
@@ -86,7 +102,7 @@ app.index()
               type: "text/javascript",
             }
           );
-          console.log("Daaata", data);
+          log("Daaata", data);
           const url = URL.createObjectURL(data);
           scriptTag.async = false;
           scriptTag.src = url;
@@ -95,24 +111,24 @@ app.index()
 
       scriptTags.push(scriptTag);
     }
-    console.log("In-between");
+    log("In-between");
 
     const footer = document.getElementsByTagName("footer")[0];
 
     // TODO: actually load these async..
     // An alternative would be to bundle these files
     // in the dist folder and let the HTTP server
-    // serve then on request.
+    // serve them on request.
     //
     // Dash core components
     const dccDir = `${sitePackagesDir}dash_core_components/`;
     const dccFiles = [
-      // "async-plotlyjs.js",
-      // "async-graph.js",
-      // "async-markdown.js",
-      // "async-highlight.js",
-      // "async-dropdown.js",
-      // "async-slider.js",
+      "async-plotlyjs.js",
+      "async-graph.js",
+      "async-markdown.js",
+      "async-highlight.js",
+      "async-dropdown.js",
+      "async-slider.js",
       "dash_core_components.min.js",
       "dash_core_components-shared.js",
     ];
@@ -148,6 +164,8 @@ app.index()
     scriptTags.forEach((script) => footer.appendChild(script));
   }
 
+  // Map of {"fileName":"directoryFileIsIn"} for all
+  // files stored in the virtual file system.
   async populateFileMap(): Promise<void> {
     const sitePackagesDir = "/lib/python3.8/site-packages/";
     const dcc = await window.workerManager.fsReadDir(
@@ -174,7 +192,7 @@ app.index()
         type: "text/javascript",
       }
     );
-    console.log("More data", data);
+    log("More data", data);
     const url = URL.createObjectURL(data);
     scriptTag.src = url;
     scriptTag.async = false;
@@ -190,6 +208,7 @@ app.index()
   workerManager: WorkerManager;
   webFlask: WebFlask;
   fileMap: { [file: string]: string };
+  dev: boolean;
 }
 
 window.webDash = new WebDash();
