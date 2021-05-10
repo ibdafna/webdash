@@ -79,7 +79,7 @@ export class WorkerManager {
    * @param dir directory name
    * @returns a list of files present in the directory
    */
-  async fsReadDir(dir: string): Promise<string> {
+  async fsReadDir(dir: string): Promise<string[]> {
     return new Promise(
       (onSuccess: Function, onError: (e: ErrorEvent) => any) => {
         this.worker.onerror = onError;
