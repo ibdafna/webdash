@@ -1,4 +1,3 @@
-.cache
-dash
+.cache/
 node_modules
 pyodide
