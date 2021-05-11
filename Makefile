@@ -5,7 +5,7 @@ install_pyodide:
 
 pyodide: install_pyodide
 	cd pyodide; \
-	git apply ../patches/webdash_0_17_x.patch;
+	git apply ../patches/webdash.patch;
 
 copy_build:
 	cd dist; \
@@ -17,10 +17,16 @@ delete_dist:
 make_dist:
 	mkdir dist;
 
-clean: delete_dist make_dist copy_build
+clean: delete_dist make_dist
 	rm -rf .cache
 
 webdash_build:
 	npm run build;
 
-all: clean webdash_build
+fetch_prebuilt: 
+	cd dist; \
+	git clone https://github.com/ibdafna/webdash_dist; \
+	mv ./webdash_dist/*.* .; \
+	rm -rf webdash_dist;
+
+setup: webdash_build fetch_prebuilt
