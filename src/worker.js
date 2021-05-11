@@ -10,9 +10,10 @@ async function loadPyodideAndPackages() {
 let pyodideReadyPromise = loadPyodideAndPackages();
 
 function fileSystemCall(msgType, param) {
-  // console.log("fileSystemCall()", msgType, param);
   const output = pyodide._module.FS[msgType](param);
-  console.log(output);
+  // Uncomment for debugging purposes
+  // console.log("fileSystemCall()", msgType, param);
+  // console.log(output);
   return output;
 }
 
@@ -64,7 +65,9 @@ onmessage = async (event) => {
   await pyodideReadyPromise;
 
   const { python, fsCommands, ...context } = event.data;
-  console.log("[3. Worker]", event.data);
+
+  // Uncomment for debugging pureposes
+  // console.log("[3. Worker]", event.data);
 
   if (fsCommands) {
     handleFsCommands(fsCommands);
