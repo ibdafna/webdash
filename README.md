@@ -2,6 +2,8 @@
 
 WebDash is a Plotly Dash distribution that **runs entirely in the browser**.
 
+![screenshot](https://user-images.githubusercontent.com/591645/117785930-53011700-b245-11eb-9931-3cba60dd2ae8.png)
+
 ## ⚡ Status ⚡
 
 ⚠️ Currently in alpha stage - do not use in production! ⚠️ (Seriously, don't do it 😼)
