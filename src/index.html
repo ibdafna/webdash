@@ -5,8 +5,44 @@
     <title>Dash-WebAssembly</title>
   </head>
   <body>
-    <p>Dash-WebAssembly is booting...</p>
-    <script src="./cross_filtering_app.ts"></script>
+    <style>
+      .loading-page {
+        display: flex;
+        flex-direction: column;
+        background: #222222;
+        color: white;
+        align-items: center;
+        justify-content: center;
+        align-content: center;
+        min-height: 98vh;
+        font-size: 2em;
+      }
+
+      .spinner {
+        border-top: 10px solid #13be3e;
+        border-right: 10px solid #e3e701;
+        border-bottom: 10px solid #00c0f0;
+        border-left: 10px solid #f010ca;
+        border-radius: 50%;
+        width: 1.5em;
+        height: 1.5em;
+        animation: spin 2s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <div class="loading-page">
+      <p>WebDash is booting...</p>
+      <div class="spinner"></div>
+    </div>
+    <script src="./dash_app/cross_filtering_app.ts"></script>
     <script src="./webdash.ts"></script>
   </body>
 </html>
