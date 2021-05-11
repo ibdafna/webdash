@@ -14,7 +14,7 @@ This allows the entire distribution to be served as a static website, eliminatin
 
 ## 🔥 Try it in your browser 🔥
 
-Demo app available on [Vercel](https://webdash-l3cxgqnxm-ibdafna.vercel.app/).
+Demo app available on [Vercel](https://webdash-wine.vercel.app/).
 
 _*We have seen issues with Vercel being slow to load pyodide dependencies on Chrome. If that's the case for you, please consider using FireFox to try the demo (we are working with Vercel on this).*_
 
