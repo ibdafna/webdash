@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "NODE_ENV=development node src/dev-server.js 8080 dist true",
-    "build": "parcel build src/index.html"
+    "prod": "NODE_ENV=production node src/dev-server.js 8080 dist true",
+    "build": "parcel build src/index.html",
+    "setup": "make setup"
   },
   "author": "Bloomberg LP",
   "license": "BSD-3-Clause",
