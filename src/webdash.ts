@@ -7,6 +7,22 @@ declare global {
     workerManager: WorkerManager;
     dashApp: string;
     webDash: WebDash;
+    log: Function;
+  }
+}
+
+/**
+ * Enables debug logs for development environments.
+ */
+let dev = false;
+if (process.env.NODE_ENV === "development") {
+  log("Worked");
+  dev = true;
+}
+
+export function log(...args) {
+  if (dev) {
+    console.log(...args);
   }
 }
 
@@ -19,6 +35,7 @@ declare global {
  */
 class WebDash {
   constructor() {
+    this.fileMap = {};
     window.workerManager = new WorkerManager();
     this.webFlask = new WebFlask();
     this.main();
@@ -31,9 +48,10 @@ class WebDash {
   async main() {
     const indexContent = await this.injectDashApp();
     const scriptChunk = await this.generateScripts(indexContent);
-    console.log("Before");
+    await this.populateFileMap();
+    log("Before");
     await this.startBootSequence(scriptChunk);
-    console.log("After");
+    log("After");
   }
 
   async injectDashApp() {
@@ -76,7 +94,7 @@ app.index()
         const fileName = `${fileNamePrefix}${ext}`;
         if (file === fileName) {
           const fullPath = `${packageDir}/${fileName}`;
-          console.log(`Adding script: ${fullPath}`);
+          log(`Adding script: ${fullPath}`);
           //scriptFilesToLoad.push(fullPath);
           const data = new Blob(
             [await window.workerManager.fsReadFile(fullPath)],
@@ -84,7 +102,7 @@ app.index()
               type: "text/javascript",
             }
           );
-          console.log("Daaata", data);
+          log("Daaata", data);
           const url = URL.createObjectURL(data);
           scriptTag.async = false;
           scriptTag.src = url;
@@ -93,31 +111,14 @@ app.index()
 
       scriptTags.push(scriptTag);
     }
-    console.log("In-between");
+    log("In-between");
 
     const footer = document.getElementsByTagName("footer")[0];
-
-    // TODO: Standardise this function for any async loading
-    //       of files from the virtual file system
-    async function generateScriptBlob(dir, fileName) {
-      const scriptTag = document.createElement("script");
-      const data = new Blob(
-        [await window.workerManager.fsReadFile(`${dir}${fileName}`)],
-        {
-          type: "text/javascript",
-        }
-      );
-      console.log("More data", data);
-      const url = URL.createObjectURL(data);
-      scriptTag.src = url;
-      scriptTag.async = false;
-      scriptTags.push(scriptTag);
-    }
 
     // TODO: actually load these async..
     // An alternative would be to bundle these files
     // in the dist folder and let the HTTP server
-    // serve then on request.
+    // serve them on request.
     //
     // Dash core components
     const dccDir = `${sitePackagesDir}dash_core_components/`;
@@ -128,19 +129,21 @@ app.index()
       "async-highlight.js",
       "async-dropdown.js",
       "async-slider.js",
+      "async-datepicker.js",
+      "async-upload.js",
       "dash_core_components.min.js",
       "dash_core_components-shared.js",
     ];
 
     for (const fileName of dccFiles) {
-      await generateScriptBlob(dccDir, fileName);
+      scriptTags.push(await this.generateScriptBlob(dccDir, fileName));
     }
 
     // Dash html components
     const dhcDir = `${sitePackagesDir}dash_html_components/`;
     const dhcFiles = ["dash_html_components.min.js"];
     for (const fileName of dhcFiles) {
-      await generateScriptBlob(dhcDir, fileName);
+      scriptTags.push(await this.generateScriptBlob(dhcDir, fileName));
     }
 
     // Start up script
@@ -163,8 +166,51 @@ app.index()
     scriptTags.forEach((script) => footer.appendChild(script));
   }
 
+  // Map of {"fileName":"directoryFileIsIn"} for all
+  // files stored in the virtual file system.
+  async populateFileMap(): Promise<void> {
+    const sitePackagesDir = "/lib/python3.8/site-packages/";
+    const dcc = await window.workerManager.fsReadDir(
+      `${sitePackagesDir}dash_core_components/`
+    );
+    const dhc = await window.workerManager.fsReadDir(
+      `${sitePackagesDir}dash_html_components/`
+    );
+
+    dcc
+      .filter((fileName) => fileName.match(/.js$/g))
+      .map((fileName) => (this.fileMap[fileName] = "dash_core_components"));
+
+    dhc
+      .filter((fileName) => fileName.match(/.js$/g))
+      .map((fileName) => (this.fileMap[fileName] = "dash_html_components"));
+  }
+
+  async generateScriptBlob(dir, fileName): Promise<HTMLScriptElement> {
+    const scriptTag = document.createElement("script");
+    const data = new Blob(
+      [await window.workerManager.fsReadFile(`${dir}${fileName}`)],
+      {
+        type: "text/javascript",
+      }
+    );
+    log("More data", data);
+    const url = URL.createObjectURL(data);
+    scriptTag.src = url;
+    scriptTag.async = false;
+    return scriptTag;
+  }
+
+  async loadDashScript(dir, fileName) {
+    const script = await this.generateScriptBlob(dir, fileName);
+    const footer = document.getElementsByTagName("footer")[0];
+    footer.appendChild(script);
+  }
+
   workerManager: WorkerManager;
   webFlask: WebFlask;
+  fileMap: { [file: string]: string };
+  dev: boolean;
 }
 
 window.webDash = new WebDash();

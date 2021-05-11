@@ -1,4 +1,3 @@
-// self.languagePluginUrl = `https://${location.hostname}:${location.port}/`;
 importScripts(`https://${location.hostname}:${location.port}/pyodide.js`);
 
 async function loadPyodideAndPackages() {
@@ -11,9 +10,10 @@ async function loadPyodideAndPackages() {
 let pyodideReadyPromise = loadPyodideAndPackages();
 
 function fileSystemCall(msgType, param) {
-  // console.log("fileSystemCall()", msgType, param);
   const output = pyodide._module.FS[msgType](param);
-  console.log(output);
+  // Uncomment for debugging purposes
+  // console.log("fileSystemCall()", msgType, param);
+  // console.log(output);
   return output;
 }
 
@@ -65,7 +65,9 @@ onmessage = async (event) => {
   await pyodideReadyPromise;
 
   const { python, fsCommands, ...context } = event.data;
-  console.log("[3. Worker]", event.data);
+
+  // Uncomment for debugging pureposes
+  // console.log("[3. Worker]", event.data);
 
   if (fsCommands) {
     handleFsCommands(fsCommands);
@@ -102,7 +104,3 @@ function postMessageError(error) {
     error: error.message,
   });
 }
-
-// var uint8array = new TextEncoder("utf-8").encode("Plain Text");
-// var string = new TextDecoder().decode(uint8array);
-// console.log(uint8array ,string )

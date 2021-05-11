@@ -33,9 +33,8 @@ export default class SimpleHTTPServer {
       ".doc": "application/msword",
       ".eot": "application/vnd.ms-fontobject",
       ".ttf": "application/x-font-ttf",
+      ".py": "text/x-python",
     };
-
-    this.sessions = new Map();
   }
 
   plainTextResponse(res, respCode, content) {
@@ -52,6 +51,13 @@ export default class SimpleHTTPServer {
     } else {
       this.handleGetRequest(req, res);
     }
+  }
+
+  handlePostRequest(res, req) {
+    // Good practice here would be to set a header value with a list
+    // of methods this server *does* support. But given it's a simple
+    // development server, I have not implemented it.
+    this.plainTextResponse(res, 405, "This server only supports GET requests!");
   }
 
   handleGetRequest(req, res) {

@@ -88,12 +88,12 @@ index 0000000..f8ff7ed
 +  - dash
 diff --git a/packages/dash/patches/disable_compression.patch b/packages/dash/patches/disable_compression.patch
 new file mode 100644
-index 0000000..aea029e
+index 0000000..dfbf09c
 --- /dev/null
 +++ b/packages/dash/patches/disable_compression.patch
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,143 @@
 +diff --git a/dash/dash.py b/dash/dash.py
-+index 54fc4c9b..67a6a2ee 100644
++index 54fc4c9b..b7a9321a 100644
 +--- a/dash/dash.py
 ++++ b/dash/dash.py
 +@@ -18,9 +18,9 @@ from functools import wraps
@@ -161,14 +161,6 @@ index 0000000..aea029e
 + 
 +         base_prefix, routes_prefix, requests_prefix = pathname_configs(
 +             url_base_pathname, routes_pathname_prefix, requests_pathname_prefix
-+@@ -1051,6 +1055,7 @@ class Dash(object):
-+ 
-+     def dispatch(self):
-+         body = flask.request.get_json()
-++        print(body)
-+         flask.g.inputs_list = inputs = body.get("inputs", [])
-+         flask.g.states_list = state = body.get("state", [])
-+         output = body["output"]
 +diff --git a/setup.py b/setup.py
 +index 1deddfd0..5d488d06 100644
 +--- a/setup.py
@@ -296,32 +288,37 @@ index 0000000..847fede
 +  imports:
 +  - jinja2
 diff --git a/packages/plotly/meta.yaml b/packages/plotly/meta.yaml
-new file mode 100644
-index 0000000..b35dc69
---- /dev/null
+index d8b5a62..b6f77aa 100644
+--- a/packages/plotly/meta.yaml
 +++ b/packages/plotly/meta.yaml
-@@ -0,0 +1,9 @@
-+package:
-+  name: plotly
+@@ -1,13 +1,12 @@
+ package:
+   name: plotly
+-  version: 4.14.3
 +  version: 4.14.1
-+source:
-+  sha256: f2a38726ddc7ce185a277c78a41b50bb8cfcfa4f53b45a481417401cadc0454c
-+  url: https://files.pythonhosted.org/packages/84/a1/83e377069e739e7512836cbfc733e90c9baefcaeb06334067c4b05860e12/plotly-4.14.1.tar.gz
-+test:
-+  imports:
-+  - plotly
+ source:
+   sha256: 7d8aaeed392e82fb8e0e48899f2d3d957b12327f9d38cdd5802bc574a8a39d91
+   url: https://files.pythonhosted.org/packages/7f/69/2acf801ff56af4cca6a2d0e17108770c42eeb5596919254c5acbcf23efaf/plotly-4.14.3.tar.gz
+ requirements:
+   run:
+-    - retrying
+     - six
+ test:
+   imports:
+-  - plotly
++    - plotly
 diff --git a/packages/six/meta.yaml b/packages/six/meta.yaml
-new file mode 100644
-index 0000000..c096703
---- /dev/null
+index bc51d59..c096703 100644
+--- a/packages/six/meta.yaml
 +++ b/packages/six/meta.yaml
-@@ -0,0 +1,6 @@
-+package:
-+  name: six
+@@ -1,6 +1,6 @@
+ package:
+   name: six
+-  version: 1.15.0
 +  version: 1.11.0
-+source:
-+  sha256: 30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259
-+  url: https://files.pythonhosted.org/packages/6b/34/415834bfdafca3c5f451532e8a8d9ba89a21c9743a0c59fbd0205c7f9426/six-1.15.0.tar.gz
+ source:
+   sha256: 30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259
+   url: https://files.pythonhosted.org/packages/6b/34/415834bfdafca3c5f451532e8a8d9ba89a21c9743a0c59fbd0205c7f9426/six-1.15.0.tar.gz
 diff --git a/packages/werkzeug/meta.yaml b/packages/werkzeug/meta.yaml
 new file mode 100644
 index 0000000..0a347b6
