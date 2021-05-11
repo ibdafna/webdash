@@ -129,6 +129,8 @@ app.index()
       "async-highlight.js",
       "async-dropdown.js",
       "async-slider.js",
+      "async-datepicker.js",
+      "async-upload.js",
       "dash_core_components.min.js",
       "dash_core_components-shared.js",
     ];
