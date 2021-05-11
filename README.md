@@ -16,10 +16,13 @@ This allows the entire distribution to be served as a static website, eliminatin
 
 Demo app available on [Vercel](https://webdash-l3cxgqnxm-ibdafna.vercel.app/).
 
+_*We have seen issues with Vercel being slow to load pyodide dependencies on Chrome. If that's the case for you, please consider using FireFox to try the demo (we are working with Vercel on this).*_
+
 ## 💣 (Very) Important stuff to be aware of 💣
 
 - This is a really, really experimental idea. It is highly likely your application won't work without some modifications, and very likely it won't work at all.
 - Only `dash`, `dash-core-components` and `dash-html-components` have been compiled to WebAssembly. `dash-daq` is not yet available. Therefore, if you application is relying on `dash-daq` or any packages outside the three mentioned above - your app won't work. Please open an issue if there's a package you'd like to add or, even better - open a PR 😻.
+- A very limited subset of the Dash API has been tested and/or implemented. This means that debugging is not available, and potentially many other features in the Dash API such as `location` etc. When you find a feature which does not work, please open an issue with a self-contained, sample app we can use to reproduce the issue.
 - Native Python-based network requests are not available inside the web-based Python kernel. This is a WebAssembly architecture limitation. This means that the Python `requests` module, although available, won't work (nor will other modules that rely on it). The good news is that you can still retrieve data using the JavaScript `fetch` API, and pyodide ships with a wrapper `pyodide.open_url()` which makes this easy to use from Python. See the `cross_filter_app.ts` file under `src/dash_apps` for an example of how to use this.
 
 ## 🎈 Running your own app 🎈
