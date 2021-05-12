@@ -39,6 +39,6 @@ See the [contributing guide](https://github.com/ibdafna/webdash/blob/main/CONTRI
 
 ## Disclaimer
 
-    WebDash started as a research project Itay Dafna (@ibdafna) worked on at Bloomberg LP, with help from Paul Ivanov (@ivanov) who provided technical mentorship, guidance and some laughs. All rights are reserved to Bloomberg LP.
+> WebDash started as a research project Itay Dafna (@ibdafna) worked on at Bloomberg LP, with help from Paul Ivanov (@ivanov) who provided technical mentorship, guidance and some laughs. All rights are reserved to Bloomberg LP.
 
 Much of this README is based on repos [@jtpio](https://github.com/jtpio/) owns.
