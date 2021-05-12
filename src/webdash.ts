@@ -102,7 +102,7 @@ app.index()
               type: "text/javascript",
             }
           );
-          log("Daaata", data);
+          log("Data", data);
           const url = URL.createObjectURL(data);
           scriptTag.async = false;
           scriptTag.src = url;
