@@ -86,12 +86,16 @@ export class WebFlask {
    * allows us to intercept get requests and redirect them
    * to the Flask backend when appropriate. (not currently functional!)
    */
-  xmlHttpRequestOpen(method, url, async, user, password): void {
-    log(arguments);
-    log("Method: ", method);
-    log("URL: ", url);
+  xmlHttpRequestOpen(...args): void {
+    let method,
+      url,
+      async,
+      user,
+      password = args;
+    console.log("Method: ", method);
+    console.log("URL: ", url);
 
-    return this.originalXHROpen.apply(this, arguments);
+    return this.originalXHROpen.apply(this, ...args);
   }
 
   router: Router;
