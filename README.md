@@ -1,5 +1,7 @@
 # WebDash
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/cd148293-d67c-497d-b82f-34772a8055a7/deploy-status)](https://app.netlify.com/sites/webdash/deploys)
+
 WebDash is a Plotly Dash distribution that **runs entirely in the browser**.
 
 ![screenshot](https://user-images.githubusercontent.com/591645/117785930-53011700-b245-11eb-9931-3cba60dd2ae8.png)
@@ -16,9 +18,9 @@ This allows the entire distribution to be served as a static website, eliminatin
 
 ## 🔥 Try it in your browser 🔥
 
-Demo app available on [Vercel](https://webdash-wine.vercel.app/).
+Demo app available on [Netlify](https://webdash.netlify.app/) and [Vercel](https://webdash-wine.vercel.app/).
 
-_*We have seen issues with Vercel being slow to load pyodide dependencies on Chrome. If that's the case for you, please consider using FireFox to try the demo (we are working with Vercel on this).*_
+_**We have seen issues with Vercel being slow to load pyodide dependencies on Chrome. If that's the case for you, please consider using FireFox to try the demo (we are working with Vercel on this) or try the Netlify deployment link instead**_
 
 ## 💣 (Very) Important stuff to be aware of 💣
 
