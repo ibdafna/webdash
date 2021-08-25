@@ -1,7 +1,7 @@
 importScripts(`https://${location.hostname}:${location.port}/pyodide.js`);
 
 async function loadPyodideAndPackages() {
-  await loadPyodide({
+  self.pyodide = await loadPyodide({
     indexURL: `https://${location.hostname}:${location.port}/`,
   });
   await self.pyodide.loadPackage([]);
@@ -48,7 +48,9 @@ function handleFsCommands(fsCommands) {
 }
 
 async function handlePythonCode(python) {
-  let result = await self.pyodide.runPythonAsync(python);
+  // Load any imports
+  await self.pyodide.loadPackagesFromImports(python, console.log, console.err)
+  let result = await self.pyodide.runPython(python);
   // Processing Proxy objects before sending.
   if (pyodide.isPyProxy(result)) {
     result = generateResponseObject(result);
