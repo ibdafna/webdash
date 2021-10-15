@@ -1,6 +1,8 @@
 import { WebFlask } from "./flask";
 import { WorkerManager } from "./worker-loader";
 
+const PYTHON_VERSION = 3.9;
+
 declare global {
   export interface Window {
     fetch: Function;
@@ -75,7 +77,7 @@ app.index()
   }
 
   async startBootSequence(scriptChunk) {
-    const sitePackagesDir = "/lib/python3.8/site-packages/";
+    const sitePackagesDir = `/lib/python${PYTHON_VERSION}/site-packages/`;
     const scriptTagsChunk = scriptChunk.split("\n");
     const rendererDir = `${sitePackagesDir}dash_renderer/`;
     const rendererDirFiles = await window.workerManager.fsReadDir(rendererDir);
@@ -169,7 +171,7 @@ app.index()
   // Map of {"fileName":"directoryFileIsIn"} for all
   // files stored in the virtual file system.
   async populateFileMap(): Promise<void> {
-    const sitePackagesDir = "/lib/python3.8/site-packages/";
+    const sitePackagesDir = `/lib/python${PYTHON_VERSION}/site-packages/`;
     const dcc = await window.workerManager.fsReadDir(
       `${sitePackagesDir}dash_core_components/`
     );
