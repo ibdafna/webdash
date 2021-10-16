@@ -1,11 +1,11 @@
 install_pyodide:
 	git clone git@github.com:pyodide/pyodide.git; \
 	cd pyodide; \
-	git checkout 0.17.0;
+	git checkout 0.18.1;
 
 pyodide: install_pyodide
 	cd pyodide; \
-	git apply ../patches/webdash.patch;
+	git apply ../patches/webdash_2.patch;
 
 copy_build:
 	cd dist; \

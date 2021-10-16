@@ -1,8 +1,15 @@
-importScripts(`https://${location.hostname}:${location.port}/pyodide.js`);
+const WEBDASH_VERSION = "0.0.2";
+
+let pyodideAddress = `https://cdn.jsdelivr.net/gh/ibdafna/webdash_dist@webdash_${WEBDASH_VERSION}`
+if (process.env.NODE_ENV === "development") {
+  pyodideAddress = `https://${location.hostname}:${location.port}`;
+}
+
+importScripts(`${pyodideAddress}/pyodide.js`);
 
 async function loadPyodideAndPackages() {
-  await loadPyodide({
-    indexURL: `https://${location.hostname}:${location.port}/`,
+  self.pyodide = await loadPyodide({
+    indexURL: `${pyodideAddress}/`,
   });
   await self.pyodide.loadPackage([]);
 }
@@ -48,7 +55,9 @@ function handleFsCommands(fsCommands) {
 }
 
 async function handlePythonCode(python) {
-  let result = await self.pyodide.runPythonAsync(python);
+  // Load any imports
+  await self.pyodide.loadPackagesFromImports(python, console.log, console.err)
+  let result = await self.pyodide.runPython(python);
   // Processing Proxy objects before sending.
   if (pyodide.isPyProxy(result)) {
     result = generateResponseObject(result);
