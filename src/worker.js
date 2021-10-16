@@ -1,8 +1,15 @@
-importScripts(`https://${location.hostname}:${location.port}/pyodide.js`);
+const WEBDASH_VERSION = "0.0.2";
+
+let pyodideAddress = `https://cdn.jsdelivr.net/gh/ibdafna/webdash_dist@webdash_${WEBDASH_VERSION}`
+if (process.env.NODE_ENV === "development") {
+  pyodideAddress = `https://${location.hostname}:${location.port}`;
+}
+
+importScripts(`${pyodideAddress}/pyodide.js`);
 
 async function loadPyodideAndPackages() {
   self.pyodide = await loadPyodide({
-    indexURL: `https://${location.hostname}:${location.port}/`,
+    indexURL: `${pyodideAddress}/`,
   });
   await self.pyodide.loadPackage([]);
 }

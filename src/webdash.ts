@@ -16,9 +16,8 @@ declare global {
 /**
  * Enables debug logs for development environments.
  */
-let dev = false;
+export let dev = false;
 if (process.env.NODE_ENV === "development") {
-  log("Worked");
   dev = true;
 }
 
