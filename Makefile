@@ -5,7 +5,7 @@ install_pyodide:
 
 pyodide: install_pyodide
 	cd pyodide; \
-	git apply ../patches/webdash_2.patch;
+	git apply ../patches/webdash.patch;
 
 copy_build:
 	cd dist; \
@@ -26,6 +26,9 @@ webdash_build:
 fetch_prebuilt: 
 	cd dist; \
 	git clone https://github.com/ibdafna/webdash_dist; \
+	cd webdash_dist; \
+	git checkout webdash_0.0.2; \
+	cd ..;\
 	mv ./webdash_dist/*.* .; \
 	rm -rf webdash_dist;
 
