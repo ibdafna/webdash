@@ -1,6 +1,6 @@
 {
-  "name": "webdash",
-  "version": "1.0.0",
+  "name": "WebDash",
+  "version": "0.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
