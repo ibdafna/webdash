@@ -142,6 +142,6 @@ def update_x_timeseries(hoverData, yaxis_column_name, axis_type):
     return create_time_series(dff, axis_type, yaxis_column_name)
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+#if __name__ == '__main__':
+#    app.run_server(debug=True)
 `;

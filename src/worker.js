@@ -9,6 +9,7 @@ importScripts(`${pyodideAddress}/pyodide.js`);
 
 async function loadPyodideAndPackages() {
   self.pyodide = await loadPyodide({
+    homedir: "/",
     indexURL: `${pyodideAddress}/`,
   });
   await self.pyodide.loadPackage([]);
