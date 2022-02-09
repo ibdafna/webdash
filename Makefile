@@ -24,6 +24,10 @@ copy_build:
 delete_dist:
 	rm -rf dist;
 
+webdash_patch:
+	cd pyodide; \
+	git diff --cached > ../patches/webdash.patch
+
 make_dist:
 	mkdir dist;
 
