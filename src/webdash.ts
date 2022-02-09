@@ -2,6 +2,14 @@ import { WebFlask } from "./flask";
 import { WorkerManager } from "./worker-loader";
 
 const PYTHON_VERSION = 3.9;
+const sitePackagesDir = `/lib/python${PYTHON_VERSION}/site-packages/`;
+const directoryMap = {
+  "deps": `${sitePackagesDir}dash/deps/`,
+  "dash-renderer": `${sitePackagesDir}dash/dash-renderer/build`,
+  "dcc": `${sitePackagesDir}dash/dcc/`,
+  "html": `${sitePackagesDir}dash/html/`,
+  "dash_table": `${sitePackagesDir}dash/dash_table/`
+}
 
 declare global {
   export interface Window {
@@ -50,11 +58,19 @@ class WebDash {
     const indexContent = await this.injectDashApp();
     const scriptChunk = await this.generateScripts(indexContent);
     await this.populateFileMap();
-    log("Before");
+    log("Starting book sequence");
     await this.startBootSequence(scriptChunk);
-    log("After");
+    log("Finished boot sequence");
   }
 
+  /**
+   * This functions feeds the input dash application to the Flask
+   * backend. Once that is done, the function injects the Dash 
+   * application to the current web page by invoking the index page
+   * function on the Dash backend. The returned string is then 
+   * appended to the page.
+   * @returns HTML string
+   */
   async injectDashApp() {
     return window.workerManager.asyncRun(
       `
@@ -65,6 +81,12 @@ app.index()
     );
   }
 
+  /**
+   * Invokes a function on the Dash side which returns a list
+   * of JavaScript tags for a number of front-end Dash dependencies.
+   * @param indexContent 
+   * @returns A list of HTML script tags
+   */
   async generateScripts(indexContent) {
     document.getElementsByTagName("html")[0].innerHTML = indexContent;
     return window.workerManager.asyncRun(
@@ -75,38 +97,51 @@ app.index()
     );
   }
 
+  /**
+   * This function is responsible for parsing the HTML script tags and
+   * loading the scripts as binary blobs, from the virtual file system,
+   * into the existing web page.
+   * @param scriptChunk 
+   */
   async startBootSequence(scriptChunk) {
-    const sitePackagesDir = `/lib/python${PYTHON_VERSION}/site-packages/`;
     const scriptTagsChunk = scriptChunk.split("\n");
-    const rendererDir = `${sitePackagesDir}dash_renderer/`;
-    const rendererDirFiles = await window.workerManager.fsReadDir(rendererDir);
+    /**
+     * Parsing each script tag sent to WebDash by the Dash backend. From that tag
+     * we identify the target package to be loaded, and we search for it in the
+     * virtual file system. If it's found, we create a binary blob from it and
+     * append to the rendered page for immediate loading.
+     * 
+     * NOTE: dash_core_components and dash_html_components are loaded separately
+     *       below this loop
+     */
     const scriptTags = [];
-    // promises do not work in Array.prototype.map(),
-    // so had to convert to a regular for-loop.
     for (const script of scriptTagsChunk) {
+      log(`Parsing script tag: ${script}`)
       let scriptTag = document.createElement("script");
-      const [route, dirName, fileName] = script.match(/(?<=[\/])[^\/]+/g);
+      const [route, parentDirName, subDirName, ...rest] = script.match(/(?<=[\/])[^\/]+/g);
+      const fileName = rest[rest.length - 2]
       const fileNamePrefix = fileName.match(/[^.@]+/g)[0];
-      const packageDir = `${sitePackagesDir}${dirName}`;
+      const packageDir = directoryMap[subDirName]
+      const curDirFiles = await window.workerManager.fsReadDir(packageDir);
 
       // Match requested file names with local copies
-      for (const file of rendererDirFiles) {
+      for (const file of curDirFiles) {
         const ext = file.match(/([.@].*\min\.js)/g);
         const fileName = `${fileNamePrefix}${ext}`;
         if (file === fileName) {
           const fullPath = `${packageDir}/${fileName}`;
           log(`Adding script: ${fullPath}`);
-          //scriptFilesToLoad.push(fullPath);
           const data = new Blob(
             [await window.workerManager.fsReadFile(fullPath)],
             {
               type: "text/javascript",
             }
           );
-          log("Data", data);
+          log(`Script blob: ${data}`);
           const url = URL.createObjectURL(data);
           scriptTag.async = false;
           scriptTag.src = url;
+          break; // Terminating loop here if we found what we came for.
         }
       }
 
@@ -122,7 +157,6 @@ app.index()
     // serve them on request.
     //
     // Dash core components
-    const dccDir = `${sitePackagesDir}dash_core_components/`;
     const dccFiles = [
       "async-plotlyjs.js",
       "async-graph.js",
@@ -132,19 +166,18 @@ app.index()
       "async-slider.js",
       "async-datepicker.js",
       "async-upload.js",
-      "dash_core_components.min.js",
+      "dash_core_components.js",
       "dash_core_components-shared.js",
     ];
 
     for (const fileName of dccFiles) {
-      scriptTags.push(await this.generateScriptBlob(dccDir, fileName));
+      scriptTags.push(await this.generateScriptBlob(directoryMap["dcc"], fileName));
     }
 
     // Dash html components
-    const dhcDir = `${sitePackagesDir}dash_html_components/`;
     const dhcFiles = ["dash_html_components.min.js"];
     for (const fileName of dhcFiles) {
-      scriptTags.push(await this.generateScriptBlob(dhcDir, fileName));
+      scriptTags.push(await this.generateScriptBlob(directoryMap["html"], fileName));
     }
 
     // Start up script
@@ -170,12 +203,11 @@ app.index()
   // Map of {"fileName":"directoryFileIsIn"} for all
   // files stored in the virtual file system.
   async populateFileMap(): Promise<void> {
-    const sitePackagesDir = `/lib/python${PYTHON_VERSION}/site-packages/`;
     const dcc = await window.workerManager.fsReadDir(
-      `${sitePackagesDir}dash_core_components/`
+      directoryMap["dcc"]
     );
     const dhc = await window.workerManager.fsReadDir(
-      `${sitePackagesDir}dash_html_components/`
+      directoryMap["html"]
     );
 
     dcc
@@ -188,6 +220,7 @@ app.index()
   }
 
   async generateScriptBlob(dir, fileName): Promise<HTMLScriptElement> {
+    log(`JavaScript Blob: processing ${fileName}`)
     const scriptTag = document.createElement("script");
     const data = new Blob(
       [await window.workerManager.fsReadFile(`${dir}${fileName}`)],
@@ -195,7 +228,6 @@ app.index()
         type: "text/javascript",
       }
     );
-    log("More data", data);
     const url = URL.createObjectURL(data);
     scriptTag.src = url;
     scriptTag.async = false;
