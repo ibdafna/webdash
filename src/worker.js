@@ -1,4 +1,4 @@
-const WEBDASH_VERSION = "0.0.2";
+const WEBDASH_VERSION = "0.0.3";
 
 let pyodideAddress = `https://cdn.jsdelivr.net/gh/ibdafna/webdash_dist@webdash_${WEBDASH_VERSION}`
 if (process.env.NODE_ENV === "development") {
