@@ -13,91 +13,44 @@ index 0000000..fdeab9c
 +test:
 +  imports:
 +  - click
-diff --git a/packages/dash-core-components/meta.yaml b/packages/dash-core-components/meta.yaml
-new file mode 100644
-index 0000000..cf55695
---- /dev/null
-+++ b/packages/dash-core-components/meta.yaml
-@@ -0,0 +1,9 @@
-+package:
-+  name: dash-core-components
-+  version: 1.14.1
-+source:
-+  sha256: 55423dfe0ede92b2efdb6dee6b7d44be141ca1e2e06f1a0effd4e7c83c929d4d
-+  url: https://files.pythonhosted.org/packages/0f/ab/5ffeeed41117383d02485f5b9204dcfaa074bfbb3ff2559afac7b904ad5c/dash_core_components-1.14.1.tar.gz
-+test:
-+  imports:
-+  - dash-core-components
-diff --git a/packages/dash-html-components/meta.yaml b/packages/dash-html-components/meta.yaml
-new file mode 100644
-index 0000000..2e7aaaf
---- /dev/null
-+++ b/packages/dash-html-components/meta.yaml
-@@ -0,0 +1,9 @@
-+package:
-+  name: dash-html-components
-+  version: 1.1.1
-+source:
-+  sha256: 2c662e640528c890aaa0fa23d48e51c4d13ce69a97841d856ddcaaf2c6a47be3
-+  url: https://files.pythonhosted.org/packages/02/ba/bb9427c62feb25bfbaf243894eeeb4e7c67a92b426ed0575a167100e436e/dash_html_components-1.1.1.tar.gz
-+test:
-+  imports:
-+  - dash-html-components
-diff --git a/packages/dash-renderer/meta.yaml b/packages/dash-renderer/meta.yaml
-new file mode 100644
-index 0000000..7e6b8c0
---- /dev/null
-+++ b/packages/dash-renderer/meta.yaml
-@@ -0,0 +1,9 @@
-+package:
-+  name: dash-renderer
-+  version: 1.8.3
-+source:
-+  sha256: f7ab2b922f4f0850bae0e9793cec99f8a1a241e5f7f5786e367ddd9e41d2b170
-+  url: https://files.pythonhosted.org/packages/72/fe/59a322edb128ad15205002c7b81e3f5e580f6791c4a100183289e05dbfcb/dash_renderer-1.8.3.tar.gz
-+test:
-+  imports:
-+  - dash-renderer
 diff --git a/packages/dash/meta.yaml b/packages/dash/meta.yaml
 new file mode 100644
-index 0000000..f8ff7ed
+index 0000000..4eab4db
 --- /dev/null
 +++ b/packages/dash/meta.yaml
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,20 @@
 +package:
 +  name: dash
-+  version: "1.18.1"
++  version: "2.1.0"
 +source:
-+  sha256: f4f82d63db13c19e15c01fc865fb35f32cb861dab36c372ccd79c96ee699a882
-+  url: https://files.pythonhosted.org/packages/dd/17/55244363969638edd1151de0ea4aa10e6a7849b42d7d0994e3082514e19d/dash-1.18.1.tar.gz
++  sha256: b5b29a3e2862a6700cf50582d81bda4edfe57d47e1c71c519a6c87f9187587e5
++  url: https://files.pythonhosted.org/packages/c1/9b/abf5424661c36b2d2d4f049ec64659cd993276ac842918465f0ecd623c35/dash-2.1.0.tar.gz
 +  patches:
 +    - patches/disable_compression.patch
++    - patches/simplify_setuppy.patch
 +requirements:
 +  run:
 +    - distlib
 +    - future
-+    - dash-renderer
 +    - flask
 +    - werkzeug
 +    - plotly
 +    - six
-+    - dash-core-components
-+    - dash-html-components
 +test:
 +  imports:
 +  - dash
 diff --git a/packages/dash/patches/disable_compression.patch b/packages/dash/patches/disable_compression.patch
 new file mode 100644
-index 0000000..dfbf09c
+index 0000000..05f7176
 --- /dev/null
 +++ b/packages/dash/patches/disable_compression.patch
-@@ -0,0 +1,143 @@
+@@ -0,0 +1,59 @@
 +diff --git a/dash/dash.py b/dash/dash.py
-+index 54fc4c9b..b7a9321a 100644
++index 3073d425..a80d6c8e 100644
 +--- a/dash/dash.py
 ++++ b/dash/dash.py
-+@@ -18,9 +18,9 @@ from functools import wraps
-+ from future.moves.urllib.parse import urlparse
++@@ -14,9 +14,9 @@ import base64
++ from urllib.parse import urlparse
 + 
 + import flask
 +-from flask_compress import Compress
@@ -105,35 +58,28 @@ index 0000000..dfbf09c
 + from werkzeug.debug.tbtools import get_current_traceback
 +-from pkg_resources import get_distribution, parse_version
 ++# from pkg_resources import get_distribution, parse_version
++ from dash import dcc
++ from dash import html
++ from dash import dash_table
++@@ -63,7 +63,7 @@ from ._grouping import (
++ )
 + 
-+ import plotly
-+ import dash_renderer
-+@@ -50,7 +50,7 @@ from ._utils import (
-+ from . import _validate
-+ from . import _watch
 + 
 +-_flask_compress_version = parse_version(get_distribution("flask-compress").version)
 ++# _flask_compress_version = parse_version(get_distribution("flask-compress").version)
 + 
 + # Add explicit mapping for map files
 + mimetypes.add_type("application/json", ".map", True)
-+@@ -259,7 +259,7 @@ class Dash(object):
++@@ -276,7 +276,7 @@ class Dash:
 +         requests_pathname_prefix=None,
 +         routes_pathname_prefix=None,
 +         serve_locally=True,
 +-        compress=None,
-++        compress=False, # Setting this to false as not needed in pyodide context.
+++        compress=False,
 +         meta_tags=None,
 +         index_string=_default_index,
 +         external_scripts=None,
-+@@ -281,20 +281,24 @@ class Dash(object):
-+             if name is None:
-+                 name = getattr(server, "name", "__main__")
-+         elif isinstance(server, bool):
-+-            name = name if name else "__main__"
-++            # name = name if name else "__main__" 
-++            name = "webFlask"
-+             self.server = flask.Flask(name) if server else None
++@@ -305,15 +305,15 @@ class Dash:
 +         else:
 +             raise ValueError("server must be a Flask app or a boolean")
 + 
@@ -146,9 +92,6 @@ index 0000000..dfbf09c
 +-            # and non-overridable default compression with Brotli is
 +-            # causing performance issues
 +-            self.server.config["COMPRESS_ALGORITHM"] = ["gzip"]
-++
-++        # Removing any compressions information
-++
 ++        # if (
 ++        #     self.server is not None
 ++        #     and not hasattr(self.server.config, "COMPRESS_ALGORITHM")
@@ -161,47 +104,57 @@ index 0000000..dfbf09c
 + 
 +         base_prefix, routes_prefix, requests_prefix = pathname_configs(
 +             url_base_pathname, routes_pathname_prefix, requests_pathname_prefix
+diff --git a/packages/dash/patches/simplify_setuppy.patch b/packages/dash/patches/simplify_setuppy.patch
+new file mode 100644
+index 0000000..67bf0b1
+--- /dev/null
++++ b/packages/dash/patches/simplify_setuppy.patch
+@@ -0,0 +1,74 @@
 +diff --git a/setup.py b/setup.py
-+index 1deddfd0..5d488d06 100644
++index 6c62c04f..fb6b3c2c 100644
 +--- a/setup.py
 ++++ b/setup.py
-+@@ -1,10 +1,5 @@
-+-import io
++@@ -1,10 +1,6 @@
++ import io
 + from setuptools import setup, find_packages
 + 
 +-main_ns = {}
-+-exec(open("dash/version.py").read(), main_ns)  # pylint: disable=exec-used
++-exec(open("dash/version.py").read(), main_ns)  # pylint: disable=exec-used, consider-using-with
 +-
 +-
 + def read_req_file(req_type):
 +     with open("requires-{}.txt".format(req_type)) as fp:
 +         requires = (line.strip() for line in fp)
-+@@ -13,7 +8,7 @@ def read_req_file(req_type):
++@@ -13,7 +9,7 @@ def read_req_file(req_type):
 + 
 + setup(
 +     name="dash",
 +-    version=main_ns["__version__"],
-++    version="0.1",
+++    version="2.1.0",
 +     author="Chris Parmer",
 +     author_email="chris@plotly.com",
 +     packages=find_packages(exclude=["tests*"]),
-+@@ -23,48 +18,5 @@ setup(
++@@ -23,49 +19,5 @@ setup(
 +         "A Python framework for building reactive web-apps. "
 +         "Developed by Plotly."
 +     ),
-+-    long_description=io.open("README.md", encoding="utf-8").read(),
++-    long_description=io.open("README.md", encoding="utf-8").read(),  # pylint: disable=consider-using-with
 +-    long_description_content_type="text/markdown",
-+-    install_requires=read_req_file("install"),
-+-    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*",
++     install_requires=read_req_file("install"),
++-    python_requires=">=3.6",
 +-    extras_require={
++-        "ci": read_req_file("ci"),
 +-        "dev": read_req_file("dev"),
 +-        "testing": read_req_file("testing"),
++-        "celery": read_req_file("celery"),
++-        "diskcache": read_req_file("diskcache"),
 +-    },
 +-    entry_points={
 +-        "console_scripts": [
 +-            "dash-generate-components = "
 +-            "dash.development.component_generator:cli",
 +-            "renderer = dash.development.build_process:renderer",
++-            "dash-update-components = dash.development.update_components:cli"
 +-        ],
 +-        "pytest11": ["dash = dash.testing.plugin"],
 +-    },
@@ -219,21 +172,17 @@ index 0000000..dfbf09c
 +-        "Intended Audience :: Science/Research",
 +-        "License :: OSI Approved :: MIT License",
 +-        "Programming Language :: Python",
-+-        "Programming Language :: Python :: 2",
-+-        "Programming Language :: Python :: 2.7",
 +-        "Programming Language :: Python :: 3",
-+-        "Programming Language :: Python :: 3.3",
-+-        "Programming Language :: Python :: 3.4",
-+-        "Programming Language :: Python :: 3.5",
 +-        "Programming Language :: Python :: 3.6",
 +-        "Programming Language :: Python :: 3.7",
++-        "Programming Language :: Python :: 3.8",
++-        "Programming Language :: Python :: 3.9",
 +-        "Topic :: Database :: Front-Ends",
 +-        "Topic :: Office/Business :: Financial :: Spreadsheet",
 +-        "Topic :: Scientific/Engineering :: Visualization",
 +-        "Topic :: Software Development :: Libraries :: Application Frameworks",
 +-        "Topic :: Software Development :: Widget Sets",
 +-    ],
-++    install_requires=read_req_file("install")
 + )
 diff --git a/packages/flask/meta.yaml b/packages/flask/meta.yaml
 new file mode 100755
@@ -289,16 +238,16 @@ index 0000000..847fede
 +  - jinja2
 diff --git a/packages/plotly/meta.yaml b/packages/plotly/meta.yaml
 new file mode 100644
-index 0000000..273f67f
+index 0000000..60d6429
 --- /dev/null
 +++ b/packages/plotly/meta.yaml
 @@ -0,0 +1,12 @@
 +package:
 +  name: plotly
-+  version: 4.14.1
++  version: 5.5.0
 +source:
-+  sha256: 7d8aaeed392e82fb8e0e48899f2d3d957b12327f9d38cdd5802bc574a8a39d91
-+  url: https://files.pythonhosted.org/packages/7f/69/2acf801ff56af4cca6a2d0e17108770c42eeb5596919254c5acbcf23efaf/plotly-4.14.3.tar.gz
++  sha256: 20b8a1a0f0434f9b8d10eb7caa66e947a9a1d698e5a53d40d447bbc0d2ae41f0
++  url: https://files.pythonhosted.org/packages/fe/0b/592c54edd09d4844ce8c922cfafe8b4181fc42483c2126b58522417f4506/plotly-5.5.0.tar.gz
 +requirements:
 +  run:
 +    - six
