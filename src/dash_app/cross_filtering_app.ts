@@ -1,11 +1,13 @@
 //@ts-ignore
 window.dashApp = `
+import pandas as pd
 import jinja2
 import markupsafe
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
-import pandas as pd
+from dash import dcc
+from dash import html
+#import dash_core_components as dcc
+#import dash_html_components as html
 import plotly.express as px
 import pyodide
 
@@ -141,7 +143,7 @@ def update_x_timeseries(hoverData, yaxis_column_name, axis_type):
     dff = dff[dff['Indicator Name'] == yaxis_column_name]
     return create_time_series(dff, axis_type, yaxis_column_name)
 
-
-#if __name__ == '__main__':
-#    app.run_server(debug=True)
+# This is not used in WebDash
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
 `;
