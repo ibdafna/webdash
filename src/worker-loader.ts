@@ -50,15 +50,36 @@ export class WorkerManager {
   ): void {
     this.queue.enqueue(onSuccess);
     this.worker.onerror = (e) => onError(e);
-    this.worker.onmessage = (e) => {
-      log("[4. Message received from worker]", e.data);
-      const success = this.queue.dequeue();
-      return success(e.data.results);
-    };
+    this.worker.onmessage = this.processMessage.bind(this);
     this.worker.postMessage({
       ...context,
       python: script,
     });
+  }
+
+  /**
+   * Processes messages received by the 'run' function.
+   * This includes console.log messages for the intitial
+   * bootstrap phase.
+   * @param e Message object
+   * @returns void or resolved promise
+   */
+  processMessage(e): Function | void {
+    log("[4. Message received from worker]", e.data);
+
+    // Update status tracker if this is a console.log message
+    if (e.data.consoleMessage) {
+      const statusBar = document.querySelector(".status");
+      if (statusBar) {
+        statusBar.innerHTML = e.data.consoleMessage;
+      }
+      return;
+    }
+
+    // Otherwise this is a response for dash-renderer
+    // and we should act on it.
+    const success = this.queue.dequeue();
+    return success(e.data.results);
   }
 
   /**

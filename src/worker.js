@@ -1,4 +1,4 @@
-const WEBDASH_VERSION = "0.0.2";
+const WEBDASH_VERSION = "0.0.3";
 
 let pyodideAddress = `https://cdn.jsdelivr.net/gh/ibdafna/webdash_dist@webdash_${WEBDASH_VERSION}`
 if (process.env.NODE_ENV === "development") {
@@ -7,11 +7,13 @@ if (process.env.NODE_ENV === "development") {
 
 importScripts(`${pyodideAddress}/pyodide.js`);
 
+
 async function loadPyodideAndPackages() {
   self.pyodide = await loadPyodide({
+    homedir: "/",
     indexURL: `${pyodideAddress}/`,
   });
-  await self.pyodide.loadPackage([]);
+  await self.pyodide.loadPackage(["pandas", "numpy", "dash"], postConsoleMessage, postConsoleMessage);
 }
 
 let pyodideReadyPromise = loadPyodideAndPackages();
@@ -111,5 +113,11 @@ function postMessageTransferable(object, transferable) {
 function postMessageError(error) {
   self.postMessage({
     error: error.message,
+  });
+}
+
+function postConsoleMessage(consoleMessage) {
+  self.postMessage({
+    consoleMessage,
   });
 }

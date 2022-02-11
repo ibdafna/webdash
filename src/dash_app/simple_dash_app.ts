@@ -112,7 +112,7 @@ def display_selected_data(selectedData):
 def display_relayout_data(relayoutData):
     return json.dumps(relayoutData, indent=2)
 
-
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# This is not used in WebDash
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
 `;

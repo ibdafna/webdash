@@ -16,8 +16,9 @@
       align-items: center;
       justify-content: center;
       align-content: center;
-      min-height: 98vh;
+      min-height: 100vh;
       font-size: 2em;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     }
 
     .spinner {
@@ -31,19 +32,97 @@
       animation: spin 2s linear infinite;
     }
 
-    @keyframes spin {
+    .status {
+      font-size: 0.5em;
+      margin-top: 1em;
+      color: darkseagreen;
+      font-family: consolas;
+      max-width: 70%;
+    }
+
+    .lds-ellipsis {
+      display: inline-block;
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+
+    .lds-ellipsis div {
+      position: absolute;
+      top: 33px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #fff;
+      animation-timing-function: cubic-bezier(0, 1, 1, 0);
+    }
+
+    .lds-ellipsis div:nth-child(1) {
+      left: 8px;
+      animation: lds-ellipsis1 0.6s infinite;
+    }
+
+    .lds-ellipsis div:nth-child(2) {
+      left: 8px;
+      animation: lds-ellipsis2 0.6s infinite;
+    }
+
+    .lds-ellipsis div:nth-child(3) {
+      left: 32px;
+      animation: lds-ellipsis2 0.6s infinite;
+    }
+
+    .lds-ellipsis div:nth-child(4) {
+      left: 56px;
+      animation: lds-ellipsis3 0.6s infinite;
+    }
+
+    @keyframes lds-ellipsis1 {
       0% {
-        transform: rotate(0deg);
+        transform: scale(0);
       }
 
       100% {
-        transform: rotate(360deg);
+        transform: scale(1);
       }
+    }
+
+    @keyframes lds-ellipsis3 {
+      0% {
+        transform: scale(1);
+      }
+
+      100% {
+        transform: scale(0);
+      }
+    }
+
+    @keyframes lds-ellipsis2 {
+      0% {
+        transform: translate(0, 0);
+      }
+
+      100% {
+        transform: translate(24px, 0);
+      }
+    }
+
+
+    body,
+    html {
+      margin: 0;
+      padding: 0;
     }
   </style>
   <div class="loading-page">
-    <p>WebDash is booting...</p>
-    <div class="spinner"></div>
+    <p>Dash is loading</p>
+    <div class="lds-ellipsis">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <div class="status"></div>
   </div>
   <script src="./dash_app/cross_filtering_app.ts"></script>
   <script src="./webdash.ts"></script>
