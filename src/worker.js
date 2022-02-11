@@ -7,12 +7,13 @@ if (process.env.NODE_ENV === "development") {
 
 importScripts(`${pyodideAddress}/pyodide.js`);
 
+
 async function loadPyodideAndPackages() {
   self.pyodide = await loadPyodide({
     homedir: "/",
     indexURL: `${pyodideAddress}/`,
   });
-  await self.pyodide.loadPackage([]);
+  await self.pyodide.loadPackage(["pandas", "numpy", "dash"], postConsoleMessage, postConsoleMessage);
 }
 
 let pyodideReadyPromise = loadPyodideAndPackages();
@@ -112,5 +113,11 @@ function postMessageTransferable(object, transferable) {
 function postMessageError(error) {
   self.postMessage({
     error: error.message,
+  });
+}
+
+function postConsoleMessage(consoleMessage) {
+  self.postMessage({
+    consoleMessage,
   });
 }
